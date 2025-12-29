@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:14
+    container_name: dab-postgres
+    environment:
+      POSTGRES_USER: dab_user
+      POSTGRES_PASSWORD: dab_password
+      POSTGRES_DB: dab_form
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
