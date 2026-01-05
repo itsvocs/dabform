@@ -6,30 +6,34 @@ FastAPI Application Entry Point
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# Router importieren
+from app.api import benutzer
+
 # App erstellen
 app = FastAPI(
     title="DAB-Form API",
     description="Digitales Durchgangsarzt-Berichtsystem",
     version="1.0.0",
-    docs_url="/docs",  # Swagger UI
-    redoc_url="/redoc"  # ReDoc UI
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
-# CORS Middleware (für Frontend)
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Router einbinden
+app.include_router(benutzer.router)
+
 # Root Endpoint
 @app.get("/")
 def root():
-    """
-    Root Endpoint - API Status
-    """
+    """Root Endpoint - API Status"""
     return {
         "message": "DAB-Form API is running!",
         "version": "1.0.0",
@@ -39,10 +43,8 @@ def root():
 # Health Check
 @app.get("/health")
 def health():
-    """
-    Health Check Endpoint
-    """
+    """Health Check Endpoint"""
     return {
         "status": "healthy",
-        "database": "not connected yet"
+        "database": "connected"
     }

@@ -1,6 +1,7 @@
 """
 Unfallbetrieb Model - Arbeitgeber/Betriebe
 """
+# pylint: disable=not-callable
 
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
