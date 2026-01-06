@@ -51,11 +51,6 @@ def get_current_admin_user(
 ) -> Benutzer:
     """
     Nur für Admin-Rolle
-    
-    Nutzung:
-    @app.delete("/admin/delete-user")
-    def admin_only(current_user: Benutzer = Depends(get_current_admin_user)):
-        ...
     """
     if current_user.rolle != "admin":
         raise HTTPException(

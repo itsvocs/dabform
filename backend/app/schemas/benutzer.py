@@ -13,7 +13,7 @@ class BenutzerBase(BaseModel):
     vorname: str = Field(..., min_length=1, max_length=100)
     nachname: str = Field(..., min_length=1, max_length=100)
     titel: Optional[str] = Field(None, max_length=50)
-    rolle: str = Field(default="arzt", pattern="^(arzt|admin)$")
+    # rolle: str = Field(default="arzt", pattern="^(arzt|admin)$")
 
 # ===== CREATE SCHEMA =====
 class BenutzerCreate(BenutzerBase):
@@ -33,7 +33,6 @@ class BenutzerUpdate(BaseModel):
     durchgangsarzt_nr: Optional[str] = None
     praxis_name: Optional[str] = None
     praxis_telefon: Optional[str] = None
-    aktiv: Optional[bool] = None
 
 # ===== RESPONSE SCHEMA (für API Response) =====
 class BenutzerResponse(BenutzerBase):
@@ -43,6 +42,7 @@ class BenutzerResponse(BenutzerBase):
     praxis_name: Optional[str] = None
     praxis_telefon: Optional[str] = None
     aktiv: bool
+    rolle: str
     erstellt_am: datetime
     aktualisiert_am: Optional[datetime] = None
 

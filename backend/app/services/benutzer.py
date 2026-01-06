@@ -55,7 +55,7 @@ def create_benutzer(db: Session, benutzer: BenutzerCreate) -> Benutzer:
         vorname=benutzer.vorname,
         nachname=benutzer.nachname,
         titel=benutzer.titel,
-        rolle=benutzer.rolle,
+        rolle="arzt",
         durchgangsarzt_nr=benutzer.durchgangsarzt_nr,
         praxis_name=benutzer.praxis_name,
         praxis_telefon=benutzer.praxis_telefon

@@ -2,7 +2,6 @@
 Authentication API Endpoints
 """
 
-from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -11,7 +10,7 @@ from app.core.security import create_access_token
 from app.core.dependencies import get_current_user
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.benutzer import BenutzerResponse
-from app.services.benutzer import get_benutzer_by_email, verify_password
+from app.services.benutzer import get_benutzer_by_email, verify_password, hash_password
 from app.models.benutzer import Benutzer
 
 # Router
@@ -58,6 +57,7 @@ def login(
             detail="Incorrect email or password"
         )
 
+
     # JWT Token erstellen
     access_token = create_access_token(
         data={
@@ -82,3 +82,33 @@ def get_current_user_info(
     Benötigt Authorization Header mit JWT Token
     """
     return current_user
+
+@router.put("/change-password")
+def change_password(
+    old_password: str,
+    new_password: str, 
+    db: Session = Depends(get_db),
+    current_user: Benutzer = Depends(get_current_user)
+):
+    """
+    Passwort ändern
+    """
+    # Passwort verifizieren
+    if not verify_password(old_password, current_user.passwort_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Altes Password ist falsch"
+        )
+    
+    if len(new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Das neue Password muss mindestens 8 Zeichen lang sein"
+        )
+
+    current_user.passwort_hash = hash_password(new_password)
+    db.commit()
+
+    return {
+        "message": "Passwort erfolgreich geändert"
+    }
