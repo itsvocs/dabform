@@ -13,3 +13,7 @@ g1_dabform/
 ## Backend Setup
 
 Siehe [backend/README.md](backend/README.md)
+
+## Frontend Setup
+
+Siehe [backend/README.md](frontend/README.md)
