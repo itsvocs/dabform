@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # Router importieren
-from app.api import benutzer, auth, patient
+from app.api import benutzer, auth, patient, bericht
 
 # App erstellen
 app = FastAPI(
@@ -31,7 +31,7 @@ app.add_middleware(
 app.include_router(benutzer.router)
 app.include_router(auth.router)
 app.include_router(patient.router)
-
+app.include_router(bericht.router)
 # Root Endpoint
 @app.get("/")
 def root():

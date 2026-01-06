@@ -2,6 +2,7 @@
 Patient CRUD Service
 """
 
+#pylint: disable=line-too-long
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.patient import Patient
@@ -12,11 +13,18 @@ def get_patient_by_id(db: Session, patient_id: int) -> Optional[Patient]:
     return db.query(Patient).filter(Patient.id == patient_id).first()
 
 def get_all_patients(db: Session, skip: int = 0, limit: int = 100) -> List[Patient]:
-    """Alle Patienten holen"""
+    """Alle Patienten holen (mit Pagination)"""
     return db.query(Patient).offset(skip).limit(limit).all()
 
+def search_patients(db: Session, query: str, skip: int = 0, limit: int = 100) -> List[Patient]:
+    """Patienten suchen (Vorname, Nachname)"""
+    search = f"%{query}%"
+    return db.query(Patient).filter(
+        (Patient.vorname.ilike(search)) | (Patient.nachname.ilike(search))
+    ).offset(skip).limit(limit).all()
+
 def create_patient(db: Session, patient: PatientCreate) -> Patient:
-    """Patient erstellen"""
+    """Neuen Patienten erstellen"""
     db_patient = Patient(**patient.model_dump())
     db.add(db_patient)
     db.commit()
@@ -29,6 +37,7 @@ def update_patient(db: Session, patient_id: int, patient_update: PatientUpdate) 
     if not db_patient:
         return None
 
+    # Nur gesetzte Felder updaten
     update_data = patient_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_patient, field, value)
@@ -42,6 +51,7 @@ def delete_patient(db: Session, patient_id: int) -> bool:
     db_patient = get_patient_by_id(db, patient_id)
     if not db_patient:
         return False
+
     db.delete(db_patient)
     db.commit()
     return True
