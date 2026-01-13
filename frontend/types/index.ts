@@ -3,11 +3,17 @@ export interface User {
   email: string;
   vorname: string;
   nachname: string;
+
   titel?: string;
+
   rolle: "arzt" | "admin";
   aktiv: boolean;
+  
   durchgangsarzt_nr?: string;
   praxis_name?: string;
+  praxis_strasse?: number;
+  praxis_plz?: string;
+  praxis_ort?: string;
   praxis_telefon?: string;
   erstellt_am: string;
   aktualisiert_am?: string;

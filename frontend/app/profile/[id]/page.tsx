@@ -12,9 +12,13 @@ import {
   Shield,
   CheckCircle2,
   XCircle,
+  Edit,
+  MapPin,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-const getUser = async (id: string) : Promise<User> => {
+const getUser = async (id: string): Promise<User> => {
   const user = {
     id: parseInt(id),
     email: "john.doe@example.com",
@@ -26,9 +30,13 @@ const getUser = async (id: string) : Promise<User> => {
     durchgangsarzt_nr: "1234567890",
     praxis_name: "Praxis Name",
     praxis_telefon: "1234567890",
+    praxis_strasse: 9,
+    praxis_plz: "12345",
+    praxis_ort: "München",
     erstellt_am: new Date().toISOString(),
     aktualisiert_am: new Date().toISOString(),
   };
+
   return user;
 };
 
@@ -92,23 +100,34 @@ const page = async ({ params }: { params: { id: string } }) => {
               <p className="text-muted-foreground mt-1">{user.email}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge
-              variant={user.aktiv ? "success" : "error"}
-              size="lg"
-              className="gap-1.5"
-            >
-              {user.aktiv ? (
-                <CheckCircle2 className="h-3.5 w-3.5" />
-              ) : (
-                <XCircle className="h-3.5 w-3.5" />
-              )}
-              {user.aktiv ? "Aktiv" : "Inaktiv"}
-            </Badge>
-            <Badge variant="outline" size="lg" className="gap-1.5 capitalize">
-              <Shield className="h-3.5 w-3.5" />
-              {user.rolle === "arzt" ? "Arzt" : "Administrator"}
-            </Badge>
+
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant={user.aktiv ? "success" : "error"}
+                size="lg"
+                className="gap-1.5"
+              >
+                {user.aktiv ? (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                ) : (
+                  <XCircle className="h-3.5 w-3.5" />
+                )}
+                {user.aktiv ? "Aktiv" : "Inaktiv"}
+              </Badge>
+              <Badge variant="outline" size="lg" className="gap-1.5 capitalize">
+                <Shield className="h-3.5 w-3.5" />
+                {user.rolle === "arzt" ? "Arzt" : "Administrator"}
+              </Badge>
+            </div>
+            <div className="flex items-end gap-2">
+              <Button variant="outline" size="lg">
+                <Link href={`/profile/edit/${user.id}`}>Profil bearbeiten</Link>
+              </Button>
+              <Button variant="outline" size="lg">
+                <Link href={"/passwort"}>Passwort zurücksetzen</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -164,6 +183,28 @@ const page = async ({ params }: { params: { id: string } }) => {
                 label="Durchgangsarzt-Nr."
                 value={user.durchgangsarzt_nr}
                 icon={FileText}
+              />
+            )}
+
+            {user.praxis_strasse && (
+              <InfoRow
+                label="Praxis Strasse"
+                value={user.praxis_strasse}
+                icon={MapPin}
+              />
+            )}
+            {user.praxis_plz && (
+              <InfoRow
+                label="Praxis PLZ"
+                value={user.praxis_plz}
+                icon={MapPin}
+              />
+            )}
+            {user.praxis_ort && (
+              <InfoRow
+                label="Praxis Ort"
+                value={user.praxis_ort}
+                icon={MapPin}
               />
             )}
           </CardPanel>
