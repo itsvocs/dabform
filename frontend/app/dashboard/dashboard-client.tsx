@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 // import { berichteApi } from "@/lib/api";
 import type { User, Bericht } from "@/types";
+import { Input } from "@/components/ui/input";
 
 interface DashboardClientProps {
   user: User;
@@ -169,8 +170,8 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white border border-slate-200 rounded-lg p-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 rounded">
-              <FileText className="h-5 w-5 text-blue-600" />
+            <div className="p-2 bg-blue-50 rounded-full">
+              <FileText className="h-5 w-5 text-sky-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{berichte.length}</p>
@@ -181,7 +182,7 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
 
         <div className="bg-white border border-slate-200 rounded-lg p-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-50 rounded">
+            <div className="p-2 bg-orange-50  rounded-full">
               <NotepadTextDashed className="h-5 w-5 text-orange-600" />
             </div>
             <div>
@@ -195,7 +196,7 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
 
         <div className="bg-white border border-slate-200 rounded-lg p-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-50 rounded">
+            <div className="p-2 bg-green-50 rounded-full">
               <FileCheck className="h-5 w-5 text-green-600" />
             </div>
             <div>
@@ -210,19 +211,19 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
 
       {/* TOOLBAR: Suche links, Button rechts */}
       <div className="flex items-center justify-between gap-6 mb-4">
-        <div className="w-[320px]">
-          <input
+        <div className="w-[400px]">
+          <Input
             type="text"
             placeholder="Suchen nach Lfd.Nr. oder Patient..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-9 px-4 border border-slate-200 rounded-md bg-white text-sm outline-none focus:ring-2 focus:ring-slate-200"
+
           />
         </div>
 
         <Link
           href="/berichte/neu"
-          className="h-9 px-5 rounded-md bg-black text-white text-sm font-medium hover:bg-slate-900 transition flex items-center"
+          className="h-9 px-5 rounded-lg bg-black text-white text-sm font-medium hover:bg-slate-900 transition flex items-center"
         >
           + Neuer Bericht
         </Link>
@@ -248,11 +249,11 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
       )}
 
       {/* TABELLE */}
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div className="border  rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-white border-b border-slate-200 text-[11px] text-slate-500">
+              <tr className="bg-white border-b text-[11px] text-muted-foreground">
                 <th className="px-6 py-3 font-medium">Lfd.Nr.</th>
                 <th className="px-6 py-3 font-medium">Patient ID</th>
                 <th className="px-6 py-3 font-medium">Status</th>
@@ -271,23 +272,23 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
                   key={bericht.id}
                   className="border-b border-slate-100 last:border-b-0"
                 >
-                  <td className="px-6 py-4 text-sm text-slate-900">
+                  <td className="px-6 py-4 text-sm text-foreground">
                     {bericht.lfd_nr}
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-500">
+                  <td className="px-6 py-4 text-sm text-muted-foreground">
                     {bericht.patient_id}
                   </td>
                   <td className="px-6 py-4">
                     <StatusBadge status={bericht.status} />
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-500">
+                  <td className="px-6 py-4 text-sm text-muted-foreground">
                     {new Date(bericht.unfalltag).toLocaleDateString("de-DE")}
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-500">
+                  <td className="px-6 py-4 text-sm text-muted-foreground">
                     {new Date(bericht.erstellt_am).toLocaleDateString("de-DE")}
                   </td>
                   {user.rolle === "admin" && (
-                    <td className="px-6 py-4 text-sm text-slate-500">
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {bericht.benutzer_id}
                     </td>
                   )}
@@ -337,13 +338,13 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
         {/* Empty State */}
         {filteredBerichte.length === 0 && (
           <div className="p-16 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-              <Search className="w-8 h-8 text-slate-400" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full  mb-4">
+              <Search className="w-8 h-8 text-muted-foreground" />
             </div>
             <h3 className="text-slate-900 font-medium text-lg mb-1">
               Keine Berichte gefunden
             </h3>
-            <p className="text-slate-500">
+            <p className="text-muted-foreground">
               {searchTerm
                 ? "Versuchen Sie einen anderen Suchbegriff."
                 : "Erstellen Sie Ihren ersten Bericht."}
@@ -356,7 +357,7 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
 
       {/* Löschen Modal */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95">
             <div className="flex items-start gap-4 mb-4">
               <div className="bg-red-100 p-3 rounded-full text-red-600">
@@ -366,7 +367,7 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
                 <h3 className="text-lg font-bold text-slate-900">
                   Bericht löschen?
                 </h3>
-                <p className="text-slate-600 text-sm mt-1 leading-relaxed">
+                <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
                   Möchten Sie diesen Bericht wirklich unwiderruflich löschen?
                   <br />
                   Diese Aktion kann nicht rückgängig gemacht werden.
@@ -399,7 +400,6 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 relative">
             <button
-              type="button"
               onClick={() => setNavModal({ ...navModal, isOpen: false })}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-full transition"
               aria-label="Modales Fenster schließen"

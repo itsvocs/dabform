@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import {
     Menu,
     MenuGroup,
-    MenuGroupLabel,
     MenuItem,
     MenuPopup,
     MenuSeparator,
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/menu";
 import { logoutAction } from '@/app/actions/auth';
 import { useAuth } from '@/contexts/auth-context';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, LogOut } from 'lucide-react';
 
 export default function Header() {
     const router = useRouter();
@@ -47,21 +46,24 @@ export default function Header() {
                             </MenuTrigger>
                             <MenuPopup>
                                 <MenuGroup>
-                                    <MenuGroupLabel>Konto</MenuGroupLabel>
                                     <Link href="/profile">
                                         <MenuItem>Profil</MenuItem>
                                     </Link>
-                                    <MenuItem>Einstellungen</MenuItem>
+                                    <Link href="/profile/edit">
+                                        <MenuItem>Konto verwalten</MenuItem>
+                                    </Link>
+                                    <Link href="/passwort">
+                                        <MenuItem>Password ändern</MenuItem>
+                                    </Link>
                                 </MenuGroup>
                                 <MenuSeparator />
                                 <MenuGroup>
-                                    <MenuGroupLabel>mehr</MenuGroupLabel>
                                     {pathname !== '/dashboard' && (
                                         <MenuItem onClick={() => router.push('/dashboard')}>
                                             Dashboard
                                         </MenuItem>
                                     )}
-                                    <MenuItem onClick={handleLogout} >Abmelden</MenuItem>
+                                    <MenuItem onClick={handleLogout} ><LogOut className='size-4' /> Abmelden</MenuItem>
                                 </MenuGroup>
                             </MenuPopup>
                         </Menu>

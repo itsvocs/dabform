@@ -131,6 +131,7 @@ const EditForm = ({ user }: Props) => {
                     type="text"
                     name="titel"
                     placeholder="Dr."
+                    key={`input-${user.titel}`}
                     defaultValue={user.titel}
                     disabled={loading}
                   />
@@ -147,6 +148,7 @@ const EditForm = ({ user }: Props) => {
                     type="text"
                     name="vorname"
                     placeholder="Vorname"
+                    key={`input-${user.vorname}`}
                     defaultValue={user.vorname}
                     disabled={loading}
                     required
@@ -164,6 +166,7 @@ const EditForm = ({ user }: Props) => {
                     type="text"
                     name="nachname"
                     placeholder="Nachname"
+                    key="input-nachname"
                     defaultValue={user.nachname}
                     disabled={loading}
                     required
@@ -181,6 +184,7 @@ const EditForm = ({ user }: Props) => {
                     type="email"
                     name="email"
                     placeholder="email@example.com"
+                    key={`input-${user.email}`}
                     defaultValue={user.email}
                     disabled={loading}
                     required
@@ -202,6 +206,7 @@ const EditForm = ({ user }: Props) => {
                     type="text"
                     name="praxis_name"
                     placeholder="Praxis Name"
+                    key={`input-praxis_name`}
                     defaultValue={user.praxis_name}
                     disabled={loading}
                   />
@@ -216,6 +221,7 @@ const EditForm = ({ user }: Props) => {
                     type="text"
                     name="praxis_telefon"
                     placeholder="01234567890"
+                    key={`input-telefon`}
                     defaultValue={user.praxis_telefon}
                     disabled={loading}
                   />
@@ -230,6 +236,7 @@ const EditForm = ({ user }: Props) => {
                     type="text"
                     name="durchgangsarzt_nr"
                     placeholder="D-Arzt Nummer"
+                    key={`input-durchgangsarzt_nr`}
                     defaultValue={user.durchgangsarzt_nr}
                     disabled={loading}
                   />
@@ -244,6 +251,7 @@ const EditForm = ({ user }: Props) => {
                     type="text"
                     name="praxis_strasse"
                     placeholder="Musterstraße 1"
+                    key={`input-praxis_strasse`}
                     defaultValue={user.praxis_strasse}
                     disabled={loading}
                   />
@@ -257,6 +265,7 @@ const EditForm = ({ user }: Props) => {
                   <Input
                     name="praxis_plz"
                     placeholder="12345"
+                    key={`input-plz`}
                     defaultValue={user.praxis_plz}
                     disabled={loading}
                   />
@@ -271,6 +280,7 @@ const EditForm = ({ user }: Props) => {
                     type="text"
                     name="praxis_ort"
                     placeholder="Stadt"
+                    key={`input-stadt`}
                     defaultValue={user.praxis_ort}
                     disabled={loading}
                   />

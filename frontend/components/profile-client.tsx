@@ -2,12 +2,10 @@
 
 import { User } from "@/types";
 import { Card, CardHeader, CardTitle, CardPanel } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
-    User as UserIcon,
-    Mail,
+
     Building2,
     Phone,
     Calendar,
@@ -37,7 +35,6 @@ const formatDate = (dateString: string) => {
 const InfoRow = ({
     label,
     value,
-    icon: Icon,
 }: {
     label: string;
     value: string | number | boolean | undefined;
@@ -47,9 +44,6 @@ const InfoRow = ({
 
     return (
         <div className="flex items-start gap-3 py-3">
-            {Icon && (
-                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-            )}
             <div className="flex-1 min-w-0">
                 <div className="text-xs font-medium text-muted-foreground mb-1">
                     {label}
@@ -86,34 +80,17 @@ export default function ProfileClient({ user }: ProfileClientProps) {
 
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-                            <UserIcon className="h-8 w-8" />
-                        </div>
+
                         <div>
                             <h1 className="text-3xl font-bold text-foreground">{fullName}</h1>
                             <p className="text-muted-foreground mt-1">{user.email}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Badge
-                            variant={user.aktiv ? "success" : "error"}
-                            size="lg"
-                            className="gap-1.5"
-                        >
-                            {user.aktiv ? (
-                                <CheckCircle2 className="h-3.5 w-3.5" />
-                            ) : (
-                                <XCircle className="h-3.5 w-3.5" />
-                            )}
-                            {user.aktiv ? "Aktiv" : "Inaktiv"}
-                        </Badge>
-                        <Badge variant="outline" size="lg" className="gap-1.5 capitalize">
-                            <Shield className="h-3.5 w-3.5" />
-                            {user.rolle === "arzt" ? "Arzt" : "Administrator"}
-                        </Badge>
                         <Button
                             variant="outline"
                             size="sm"
+                            className="rounded-full"
                             onClick={() => router.push('/profile/edit')}
                         >
                             <Edit className="h-4 w-4 mr-2" />
@@ -131,18 +108,17 @@ export default function ProfileClient({ user }: ProfileClientProps) {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <UserIcon className="h-5 w-5" />
                             Persönliche Informationen
                         </CardTitle>
                     </CardHeader>
                     <CardPanel className="space-y-1">
-                        <InfoRow label="Vorname" value={user.vorname} icon={UserIcon} />
-                        <InfoRow label="Nachname" value={user.nachname} icon={UserIcon} />
+                        <InfoRow label="Vorname" value={user.vorname} />
+                        <InfoRow label="Nachname" value={user.nachname} />
                         {user.titel && (
-                            <InfoRow label="Titel" value={user.titel} icon={UserIcon} />
+                            <InfoRow label="Titel" value={user.titel} />
                         )}
-                        <InfoRow label="E-Mail" value={user.email} icon={Mail} />
-                        <InfoRow label="Benutzer-ID" value={user.id} icon={FileText} />
+                        <InfoRow label="E-Mail" value={user.email} />
+                        <InfoRow label="Benutzer-ID" value={user.id} />
                     </CardPanel>
                 </Card>
 
