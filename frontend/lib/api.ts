@@ -12,9 +12,6 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
   });
 
   if (response.status === 401) {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
-    }
     throw new Error('Not authenticated');
   }
 

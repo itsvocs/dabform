@@ -11,10 +11,11 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { CircleAlertIcon } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
-
+import { useAuth } from '@/contexts/auth-context';
 
 export default function Login() {
     const router = useRouter();
+    const { login } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -29,14 +30,7 @@ export default function Login() {
 
         try {
             const response = await authApi.login(email, password);
-
-            // Server Action aufrufen um Cookie zu setzen
-            await fetch('/api/session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: response.access_token }),
-            });
-
+            await login(response.access_token); // Context aktualisiert
             router.push('/dashboard');
         } catch (err) {
             setError(err instanceof Error ? err.message : "Login fehlgeschlagen");
@@ -50,20 +44,14 @@ export default function Login() {
             <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="flex items-center">
-                        <Logo
-                            className="h-10 w-10 text-foreground -translate-x-3.5"
-                            aria-hidden={true}
-                        />
+                        <Logo className="h-10 w-10 text-foreground -translate-x-3.5" aria-hidden={true} />
                     </div>
                     <h3 className="mt-6 text-xl font-semibold text-foreground">
                         Melden Sie sich in Ihrem Konto an
                     </h3>
                     <p className="mt-2 text-sm text-muted-foreground">
                         Noch kein Konto?{" "}
-                        <Link
-                            href="/register"
-                            className="font-medium text-primary hover:text-primary/90"
-                        >
+                        <Link href="/register" className="font-medium text-primary hover:text-primary/90">
                             Konto erstellen
                         </Link>
                     </p>
@@ -84,9 +72,7 @@ export default function Login() {
 
                     <form onSubmit={onSubmit} className="mt-6 space-y-4">
                         <div>
-                            <label htmlFor="email" className="text-sm font-medium">
-                                Email
-                            </label>
+                            <label htmlFor="email" className="text-sm font-medium">Email</label>
                             <Input
                                 size="lg"
                                 type="email"
@@ -100,9 +86,7 @@ export default function Login() {
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="text-sm font-medium">
-                                Passwort
-                            </label>
+                            <label htmlFor="password" className="text-sm font-medium">Passwort</label>
                             <Input
                                 size="lg"
                                 type="password"
@@ -115,27 +99,14 @@ export default function Login() {
                             />
                         </div>
 
-                        <Button
-                            type="submit"
-                            className="mt-4 w-full py-2 font-medium"
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <>
-                                    <Spinner /> Loading...
-                                </>
-                            ) : (
-                                "Einloggen"
-                            )}
+                        <Button type="submit" className="mt-4 w-full py-2 font-medium" disabled={loading}>
+                            {loading ? <><Spinner /> Loading...</> : "Einloggen"}
                         </Button>
                     </form>
 
                     <p className="mt-6 text-sm text-muted-foreground">
                         Passwort vergessen?{" "}
-                        <Link
-                            href="/reset-password"
-                            className="font-medium text-primary hover:text-primary/90"
-                        >
+                        <Link href="/reset-password" className="font-medium text-primary hover:text-primary/90">
                             Passwort zurücksetzen
                         </Link>
                     </p>

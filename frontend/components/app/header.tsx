@@ -1,26 +1,74 @@
-'use client'
+'use client';
 
-import Logo from '../utils/logo'
-import Link from 'next/link'
-
+import Logo from '../utils/logo';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import {
+    Menu,
+    MenuGroup,
+    MenuGroupLabel,
+    MenuItem,
+    MenuPopup,
+    MenuSeparator,
+    MenuTrigger,
+} from "@/components/ui/menu";
+import { logoutAction } from '@/app/actions/auth';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function Header() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const { user, loading, logout } = useAuth();
+
+    const handleLogout = async () => {
+        logout();
+        await logoutAction();
+    };
 
     return (
-        <header className="">
-            <nav aria-label="Global" className="mx-auto flex max-w-[1300px] items-center justify-between p-6 lg:px-8">
-                <div className="flex ">
+        <header className="border-b bg-background">
+            <nav className="mx-auto flex max-w-[1300px] items-center justify-between p-6 lg:px-8">
+                <div className="flex">
                     <Link href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
                         <Logo className="h-8 w-auto" />
                         <span className="text-2xl font-medium text-foreground/70">Dabform</span>
                     </Link>
                 </div>
-                <div className="flex">
-                    <Link href="/login" className="text-foreground0">
-                        Sich anmelden
-                    </Link>
+
+                <div className="flex items-center gap-4">
+                    {loading ? (
+                        <div className="h-8 w-20 animate-pulse bg-muted rounded" />
+                    ) : user ? (
+                        <Menu>
+                            <MenuTrigger render={<Button variant="outline" />}>Dr.{" "} {user.vorname} {" "} {user.nachname}</MenuTrigger>
+                            <MenuPopup>
+                                <MenuGroup>
+                                    <MenuGroupLabel>Konto</MenuGroupLabel>
+                                    <MenuItem>Profil</MenuItem>
+                                    <MenuItem>Einstellungen</MenuItem>
+                                </MenuGroup>
+                                <MenuSeparator />
+                                <MenuGroup>
+                                    <MenuGroupLabel>mehr</MenuGroupLabel>
+                                    {pathname !== '/dashboard' && (
+                                        <MenuItem onClick={() => router.push('/dashboard')}>
+                                            Dashboard
+                                        </MenuItem>
+                                    )}
+                                    <MenuItem onClick={handleLogout} >Abmelden</MenuItem>
+                                </MenuGroup>
+                            </MenuPopup>
+                        </Menu>
+                    ) : (
+                        <Link href="/login">
+                            <Button variant="ghost">
+                                Sich anmelden
+                            </Button>
+                        </Link>
+                    )}
                 </div>
             </nav>
         </header>
-    )
+    );
 }
