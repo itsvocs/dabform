@@ -1,70 +1,53 @@
-"use client";
+'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import Logo from "@/components/utils/logo";
-import { useState } from "react";
+import { authApi } from '@/lib/api';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { CircleAlertIcon } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
-import { Form } from "@/components/ui/form";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import Link from "next/link";
-import { loginAction } from "../actions/auth";
-import { useRouter } from "next/navigation";
 
-type Errors = Record<string, string | string[]>;
 
 export default function Login() {
-    const router = useRouter()
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<Errors>({});
-    const [generalError, setGeneralError] = useState("");
+    const [error, setError] = useState("");
 
     const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setLoading(true);
-        setErrors({});
-        setGeneralError("");
+        setError("");
 
         const formData = new FormData(event.currentTarget);
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
 
         try {
-            const response = await loginAction(formData);
+            const response = await authApi.login(email, password);
 
-            if (response?.errors) {
-                setErrors(response.errors as Errors);
-            }
+            // Server Action aufrufen um Cookie zu setzen
+            await fetch('/api/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.access_token }),
+            });
 
-            if (response?.message) {
-                setGeneralError(response.message);
-            }
-
-            if (response?.success) {
-                router.push("/dashboard")
-            }
-        } catch (error) {
-            setGeneralError("Ein unerwarteter Fehler ist aufgetreten");
-            console.log(error)
+            router.push('/dashboard');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Login fehlgeschlagen");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex items-center justify-center ">
+        <div className="flex items-center justify-center min-h-screen">
             <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
-                <div className="sm:mx-auto sm:w-full sm:max-w-5xl">
-                    {generalError && (
-                        <Alert variant="error" className="mb-4">
-                            <CircleAlertIcon />
-                            <AlertTitle>Fehler</AlertTitle>
-                            <AlertDescription>{generalError}</AlertDescription>
-                        </Alert>
-                    )}
-
-                </div>
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="flex items-center">
                         <Logo
@@ -91,28 +74,46 @@ export default function Login() {
                         </div>
                     </div>
 
-                    <Form className="mt-6 space-y-4" errors={errors} onSubmit={onSubmit}>
-                        <Field name="email">
-                            <FieldLabel>Email</FieldLabel>
+                    {error && (
+                        <Alert variant="error" className="mb-4">
+                            <CircleAlertIcon />
+                            <AlertTitle>Fehler</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
+
+                    <form onSubmit={onSubmit} className="mt-6 space-y-4">
+                        <div>
+                            <label htmlFor="email" className="text-sm font-medium">
+                                Email
+                            </label>
                             <Input
                                 size="lg"
                                 type="email"
+                                id="email"
+                                name="email"
                                 placeholder="name@praxis-name.de"
+                                className="mt-2"
                                 disabled={loading}
+                                required
                             />
-                            <FieldError />
-                        </Field>
+                        </div>
 
-                        <Field name="password">
-                            <FieldLabel>Passwort</FieldLabel>
+                        <div>
+                            <label htmlFor="password" className="text-sm font-medium">
+                                Passwort
+                            </label>
                             <Input
                                 size="lg"
                                 type="password"
+                                id="password"
+                                name="password"
                                 placeholder="**************"
+                                className="mt-2"
                                 disabled={loading}
+                                required
                             />
-                            <FieldError />
-                        </Field>
+                        </div>
 
                         <Button
                             type="submit"
@@ -127,7 +128,7 @@ export default function Login() {
                                 "Einloggen"
                             )}
                         </Button>
-                    </Form>
+                    </form>
 
                     <p className="mt-6 text-sm text-muted-foreground">
                         Passwort vergessen?{" "}

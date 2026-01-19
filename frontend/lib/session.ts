@@ -12,10 +12,11 @@ export async function createSession(backendToken: string) {
 
   cookieStore.set("session", backendToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     expires: expiresAt,
     sameSite: "lax",
     path: "/",
+    domain: 'localhost',
   });
 }
 
