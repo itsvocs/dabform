@@ -45,7 +45,9 @@ export default function Header() {
                             <MenuPopup>
                                 <MenuGroup>
                                     <MenuGroupLabel>Konto</MenuGroupLabel>
-                                    <MenuItem>Profil</MenuItem>
+                                    <Link href="/profile">
+                                        <MenuItem>Profil</MenuItem>
+                                    </Link>
                                     <MenuItem>Einstellungen</MenuItem>
                                 </MenuGroup>
                                 <MenuSeparator />

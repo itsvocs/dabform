@@ -1,23 +1,32 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { authApi } from '@/lib/api';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
 import ProfileClient from '@/components/profile-client';
 
-export default async function ProfilePage() {
-    // Server-Side: Session checken
-    const cookieStore = await cookies();
-    const session = cookieStore.get('session')?.value;
+export default function ProfilePage() {
+    const router = useRouter();
+    const { user, loading } = useAuth();
 
-    if (!session) {
-        redirect('/login');
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push('/login');
+        }
+    }, [user, loading, router]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center animate-pulse">
+                    <p className="text-muted-foreground">Laden...</p>
+                </div>
+            </div>
+        );
     }
 
-    let user
-    try {
-        user = await authApi.getCurrentUser();
-    } catch (error) {
-        console.error('Profile error:', error);
-        redirect('/login');
+    if (!user) {
+        return null;
     }
 
     return <ProfileClient user={user} />;
