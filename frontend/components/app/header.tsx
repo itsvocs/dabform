@@ -16,7 +16,7 @@ export default function Header() {
                     </Link>
                 </div>
                 <div className="flex">
-                    <Link href="/login" className="text-foreground/90 text-sm">
+                    <Link href="/login" className="text-foreground0">
                         Sich anmelden
                     </Link>
                 </div>
