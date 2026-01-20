@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/menu";
 import { logoutAction } from '@/app/actions/auth';
 import { useAuth } from '@/contexts/auth-context';
+import { ChevronDown } from 'lucide-react';
 
 export default function Header() {
     const router = useRouter();
@@ -41,7 +42,9 @@ export default function Header() {
                         <div className="h-8 w-20 animate-pulse bg-muted rounded" />
                     ) : user ? (
                         <Menu>
-                            <MenuTrigger render={<Button variant="outline" />}>Dr.{" "} {user.vorname} {" "} {user.nachname}</MenuTrigger>
+                            <MenuTrigger render={<Button variant="ghost" />}>Dr.{" "} {user.vorname} {" "} {user.nachname}
+                                <ChevronDown className='size-4' />
+                            </MenuTrigger>
                             <MenuPopup>
                                 <MenuGroup>
                                     <MenuGroupLabel>Konto</MenuGroupLabel>
