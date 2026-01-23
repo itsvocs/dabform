@@ -222,7 +222,7 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
         </div>
 
         <Link
-          href="/berichte/neu"
+          href="/formular"
           className="h-9 px-5 rounded-lg bg-black text-white text-sm font-medium hover:bg-slate-900 transition flex items-center"
         >
           + Neuer Bericht
