@@ -18,6 +18,7 @@ from typing import Optional
 import os
 
 
+
 class F1000PDFGenerator:
     """Generator für das F1000 Durchgangsarztbericht-Formular"""
     
@@ -28,11 +29,11 @@ class F1000PDFGenerator:
         self.margin_top = 12 * mm
         self.margin_bottom = 12 * mm
         self.content_width = self.page_width - self.margin_left - self.margin_right
-        
+
         # Styles
         self.styles = getSampleStyleSheet()
         self._setup_styles()
-    
+
     def _setup_styles(self):
         """Custom Styles für das Formular"""
         self.styles.add(ParagraphStyle(
@@ -85,18 +86,18 @@ class F1000PDFGenerator:
     
     def _checkbox(self, checked: bool) -> str:
         """Checkbox Symbol"""
-        return "☒" if checked else "☐"
-    
+        return "[X]" if checked else "[ ]"
+
     def _draw_header(self, c: canvas.Canvas, y: float, for_kasse: bool = False) -> float:
         """Kopfzeile zeichnen"""
         # Formular-Kennung links oben
         c.setFont("Helvetica", 7)
         c.drawString(self.margin_left, self.page_height - 10*mm, "F 1000 0718 Durchgangsarztbericht")
-        
         # Titel
+        title_y = self.page_height - 20 * mm
         c.setFont("Helvetica-Bold", 12)
         title = "Durchgangsarztbericht - Für die Krankenkasse -" if for_kasse else "Durchgangsarztbericht"
-        c.drawString(self.margin_left, y, title)
+        c.drawString(self.margin_left, title_y, title)
         
         if not for_kasse:
             c.setFont("Helvetica", 10)
@@ -129,7 +130,7 @@ class F1000PDFGenerator:
                              label: str, checked: bool):
         """Checkbox mit Label"""
         c.setFont("Helvetica", 8)
-        checkbox = "☒" if checked else "☐"
+        checkbox = "[X]" if checked else "[ ]"
         c.drawString(x, y, f"{checkbox} {label}")
     
     def generate_uv_traeger_pdf(self, bericht: dict, patient: dict, 

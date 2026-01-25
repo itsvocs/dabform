@@ -24,7 +24,7 @@ router = APIRouter(prefix="/api/berichte", tags=["PDF"])
 def _txt(v):
     return v if v is not None else ""
 
-def _to_bool(self, v) -> bool:
+def _to_bool(v):
     if v is None:
         return False
     if isinstance(v, bool):
@@ -32,11 +32,7 @@ def _to_bool(self, v) -> bool:
     if isinstance(v, (int, float)):
         return v != 0
     if isinstance(v, str):
-        s = v.strip().lower()
-        if s in ("true", "1", "yes", "ja", "y", "on"):
-            return True
-        if s in ("false", "0", "no", "nein", "n", "off", ""):
-            return False
+        return v.strip().lower() in ("true", "1", "yes", "ja", "y", "on")
     return bool(v)
 
 
