@@ -1,51 +1,48 @@
 """
-Patient Model - Versicherte Personen
-
+Patient Model - ERWEITERT
 """
-# pylint: disable=not-callable
 
-from sqlalchemy import Column, Integer, String, Date, Boolean, ForeignKey, DateTime
+from datetime import datetime
+from sqlalchemy import Column, Integer, String, Boolean, Date, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from app.core.database import Base
-from sqlalchemy.sql import func
+
 
 class Patient(Base):
-    """
-    Patient (Versicherter)
-    
-    Tabelle: patient
-    """
-
+    """Patient Datenbank Model - Erweitert für F1000"""
     __tablename__ = "patient"
 
-    # Primary Key
+    # ===== STAMMDATEN =====
     id = Column(Integer, primary_key=True, index=True)
-
-    # Personal Data
     vorname = Column(String(100), nullable=False)
-    nachname = Column(String(100), nullable=False)
+    nachname = Column(String(100), nullable=False, index=True)
     geburtsdatum = Column(Date, nullable=False)
-    geschlecht = Column(String(10), nullable=True)  # 'm', 'w', 'd'
+    geschlecht = Column(String(1), nullable=True)  # m | w | d
+    telefon = Column(String(50), nullable=True)
     staatsangehoerigkeit = Column(String(100), nullable=True)
 
-    # Address
+    # ===== ANSCHRIFT =====
     strasse = Column(String(255), nullable=True)
     plz = Column(String(10), nullable=True)
     ort = Column(String(100), nullable=True)
-    telefon = Column(String(50), nullable=True)
-    
-    # Insurance
-    krankenkasse_id = Column(Integer, ForeignKey('krankenkasse.id'), nullable=True)
-    familienversichert = Column(Boolean, default=False, nullable=False)
+
+    # ===== VERSICHERUNG =====
+    krankenkasse_id = Column(Integer, ForeignKey("krankenkasse.id"), nullable=True)
+    familienversichert = Column(Boolean, default=False)
+    # NEU: Name des Hauptversicherten bei Familienversicherung
     familienversichert_name = Column(String(255), nullable=True)
+    # NEU: Pflegekasse (bei Pflegeunfall)
     pflegekasse = Column(String(255), nullable=True)
-    
-    # Employment
+
+    # ===== BESCHÄFTIGUNG =====
     beschaeftigt_als = Column(String(255), nullable=True)
+    # NEU: Beschäftigt seit
     beschaeftigt_seit = Column(Date, nullable=True)
-    
-    # Timestamps
-    erstellt_am = Column(DateTime(timezone=True), server_default=func.now())
-    aktualisiert_am = Column(DateTime(timezone=True), onupdate=func.now())
-    
-    def __repr__(self):
-        return f"<Patient(id={self.id}, name='{self.vorname} {self.nachname}')>"
+
+    # ===== SYSTEM-FELDER =====
+    erstellt_am = Column(DateTime, default=datetime.utcnow)
+    aktualisiert_am = Column(DateTime, onupdate=datetime.utcnow)
+
+    # ===== RELATIONSHIPS =====
+    krankenkasse = relationship("Krankenkasse", back_populates="patienten")
+    berichte = relationship("Bericht", back_populates="patient")

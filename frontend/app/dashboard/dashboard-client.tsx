@@ -28,9 +28,6 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
   const [searchTerm, setSearchTerm] = useState("");
   // const [loading, setLoading] = useState(false);
 
-
-  console.log(berichte);
-
   // Modals & Alert State
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
@@ -49,19 +46,6 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
     type: "view",
   });
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
-
-  // Berichte laden
-  // const loadBerichte = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const data = await berichteApi.getAll();
-  //     setBerichte(data);
-  //   } catch (error) {
-  //     console.error("Error loading berichte:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   // Archivierungsfrist prüfen (30 Jahre)
   const isOlderThan30Years = (dateString: string) => {
@@ -146,7 +130,7 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
 
   // Action Buttons
   const actionBtn =
-    "h-6 w-6 inline-flex items-center justify-center rounded border border-slate-200 bg-white hover:bg-slate-50 transition";
+    "h-6 w-6 inline-flex items-center justify-center rounded border bg-white hover:bg-slate-50 transition";
   const actionBtnDanger =
     "h-6 w-6 inline-flex items-center justify-center rounded border border-red-200 bg-white text-red-600 hover:bg-red-50 transition";
 
@@ -168,7 +152,7 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
 
       {/* Statistiken */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
+        <div className="bg-white border rounded-lg p-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-50 rounded-full">
               <FileText className="h-5 w-5 text-sky-600" />
@@ -180,7 +164,7 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
+        <div className="bg-white border rounded-lg p-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-orange-50  rounded-full">
               <NotepadTextDashed className="h-5 w-5 text-orange-600" />
@@ -194,7 +178,7 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
+        <div className="bg-white border rounded-lg p-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-50 rounded-full">
               <FileCheck className="h-5 w-5 text-green-600" />

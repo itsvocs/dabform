@@ -1,20 +1,15 @@
 """
-Unfallbetrieb Model - Arbeitgeber/Betriebe
+Unfallbetrieb Model
 """
-# pylint: disable=not-callable
 
+from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 
 class Unfallbetrieb(Base):
-    """
-    Unfallbetrieb (Arbeitgeber)
-
-    Tabelle: unfallbetrieb
-    """
-
+    """Unfallbetrieb Datenbank Model"""
     __tablename__ = "unfallbetrieb"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -23,9 +18,10 @@ class Unfallbetrieb(Base):
     plz = Column(String(10), nullable=True)
     ort = Column(String(100), nullable=True)
     telefon = Column(String(50), nullable=True)
-    branche = Column(String(100), nullable=True)
-    erstellt_am = Column(DateTime(timezone=True), server_default=func.now())
-    aktualisiert_am = Column(DateTime(timezone=True), onupdate=func.now())
-
-    def __repr__(self):
-        return f"<Unfallbetrieb(id={self.id}, name='{self.name}')>"
+    branche = Column(String(255), nullable=True)
+    
+    # Timestamps
+    erstellt_am = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    berichte = relationship("Bericht", back_populates="unfallbetrieb")

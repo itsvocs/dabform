@@ -1,38 +1,48 @@
 import { z } from "zod";
 
+// ==========================================
+// HELPER SCHEMAS
+// ==========================================
+
+const optionalString = z.string().trim().optional().or(z.literal(""));
 const plzSchema = z.string().regex(/^\d{5}$/, "PLZ muss 5-stellig sein");
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Ungültiges Datum");
 const timeSchema = z.string().regex(/^\d{2}:\d{2}$/, "Ungültige Uhrzeit");
+const optionalDateSchema = dateSchema.or(z.literal("")).optional();
+const optionalTimeSchema = timeSchema.or(z.literal("")).optional();
 
-const patientSchema = z.object({
-  vorname: z.string().min(2, "Vorname muss mindestens 2 Zeichen haben"),
-  nachname: z.string().min(2, "Nachname ist Pflicht"),
+// ==========================================
+// TEIL-SCHEMAS
+// ==========================================
+
+export const patientSchema = z.object({
+  id: z.number().optional(),
+  vorname: z.string().min(2, "Vorname fehlt"),
+  nachname: z.string().min(2, "Nachname fehlt"),
   geburtsdatum: dateSchema,
-  geschlecht: z.string().min(1, "Bitte Geschlecht wählen"),
-
-  telefon: z.string().min(1, "Telefonnummer ist Pflicht"),
-  strasse: z.string().min(1, "Straße ist Pflicht"),
+  geschlecht: z.string().min(1, "Geschlecht wählen"),
+  telefon: z.string().min(1, "Telefon fehlt"),
+  strasse: z.string().min(1, "Straße fehlt"),
   plz: plzSchema,
-  ort: z.string().min(1, "Ort ist Pflicht"),
-  staatsangehoerigkeit: z.string().min(1, "Staatsangehörigkeit ist Pflicht"),
-
-  beschaeftigt_als: z.string().min(1, "Tätigkeit ist Pflicht"),
-  beschaeftigt_seit: dateSchema,
-
-  familienversichert: z.boolean(),
-  familienversichert_name: z.string().optional(),
-
-  pflegekasse: z.string().optional(),
+  ort: z.string().min(1, "Ort fehlt"),
+  staatsangehoerigkeit: z.string().min(1, "Staatsangeh. fehlt"),
+  beschaeftigt_als: z.string().min(1, "Tätigkeit fehlt"),
+  beschaeftigt_seit: optionalDateSchema,
+  familienversichert: z.boolean().default(false),
+  familienversichert_name: optionalString,
+  pflegekasse: optionalString,
 });
 
-const krankenkasseSchema = z.object({
-  name: z.string().min(1, "Name der Krankenkasse fehlt"),
+export const krankenkasseSchema = z.object({
+  id: z.number().optional(),
+  name: z.string().min(1, "Name fehlt"),
   kuerzel: z.string().min(1, "Kürzel fehlt"),
   ik_nummer: z.string().min(1, "IK-Nummer fehlt"),
 });
 
-const unfallbetriebSchema = z.object({
-  name: z.string().min(1, "Name des Betriebs fehlt"),
+export const unfallbetriebSchema = z.object({
+  id: z.number().optional(),
+  name: z.string().min(1, "Name fehlt"),
   strasse: z.string().min(1, "Straße fehlt"),
   plz: plzSchema,
   ort: z.string().min(1, "Ort fehlt"),
@@ -40,165 +50,146 @@ const unfallbetriebSchema = z.object({
   branche: z.string().min(1, "Branche fehlt"),
 });
 
-const uvTraegerSchema = z.object({
-  name: z.string().min(1, "Name des UV-Trägers fehlt"),
+export const uvTraegerSchema = z.object({
+  id: z.number().optional(),
+  name: z.string().min(1, "Name fehlt"),
   kuerzel: z.string().min(1, "Kürzel fehlt"),
-  adresse: z.string().min(1, "Anschrift fehlt"),
+  adresse: z.string().min(1, "Adresse fehlt"),
   telefon: z.string().min(1, "Telefon fehlt"),
-  email: z.string().min(1, "E-Mail fehlt").email("Ungültige E-Mail"),
-  erstellt_am: z.string().optional(),
+  email: z.email("Ungültige E-Mail").or(z.literal("")).optional(),
 });
 
-const berichtBaseSchema = z.object({
-  ist_pflegeunfall: z.boolean().default(false),
+export const berichtSchema = z.object({
+  id: z.number().optional(),
   lfd_nr: z.string().min(1, "Lfd. Nr. fehlt"),
+  ist_pflegeunfall: z.boolean().default(false),
 
-  erstellt_am: z.string().optional(),
-  abgeschlossen_am: z.string().optional(),
-
-
-
+  // Unfalldaten
   unfalltag: dateSchema,
   unfallzeit: timeSchema,
-  arbeitszeit_beginn: timeSchema,
-  arbeitszeit_ende: timeSchema,
-
+  arbeitszeit_beginn: optionalTimeSchema,
+  arbeitszeit_ende: optionalTimeSchema,
   unfallort: z.string().min(1, "Unfallort fehlt"),
-  unfallhergang: z.string().min(1, "Unfallhergang fehlt"),
+  unfallhergang: z.string().min(1, "Hergang fehlt"),
+  verhalten_nach_unfall: z.string().min(1, "Angabe fehlt"),
 
-  verhalten_nach_unfall: z.string().min(1, "Angabe zum Verhalten nach Unfall fehlt"),
-  art_erstversorgung: z.string().min(1, "Art der Erstversorgung fehlt"),
-
+  // Erstversorgung
+  art_erstversorgung: z.string().min(1, "Angabe fehlt"),
   erstbehandlung_datum: dateSchema,
-  erstbehandlung_durch: z.string().min(1, "Name des erstbehandelnden Arztes fehlt"),
+  erstbehandlung_durch: z.string().min(1, "Arzt fehlt"),
 
-  verdacht_alkohol_drogen: z.boolean(),
-  alkohol_drogen_anzeichen: z.string().optional(),
-  blutentnahme_durchgefuehrt: z.boolean(),
+  // Befund
+  verdacht_alkohol_drogen: z.boolean().default(false),
+  alkohol_drogen_anzeichen: optionalString,
+  blutentnahme_durchgefuehrt: z.boolean().default(false),
+  klinische_befunde: optionalString,
+  bildgebende_diagnostik: optionalString,
+  erstdiagnose_freitext: optionalString,
+  beschwerden_klagen: optionalString,
 
-  beschwerden_klagen: z.string().min(1, "Klagen/Beschwerden fehlen"),
-  klinische_befunde: z.string().min(1, "Klinische Befunde fehlen"),
-  bildgebende_diagnostik: z.string().min(1, "Bildgebende Diagnostik fehlt"),
-  erstdiagnose_freitext: z.string().min(1, "Erstdiagnose fehlt"),
+  // Spezielle Verletzungen
+  handverletzung: z.boolean().default(false),
+  gebrauchshand: optionalString,
+  polytrauma: z.boolean().default(false),
+  iss_score: optionalString,
 
-  handverletzung: z.boolean(),
-  gebrauchshand: z.string().optional(),
+  // Ergänzungsberichte
+  ergaenzung_kopfverletzung: z.boolean().default(false),
+  ergaenzung_knieverletzung: z.boolean().default(false),
+  ergaenzung_schulterverletzung: z.boolean().default(false),
+  ergaenzung_verbrennung: z.boolean().default(false),
 
-  polytrauma: z.boolean(),
-  iss_score: z.string().optional(),
+  // Diagnose Codes
+  erstdiagnose_icd10: optionalString,
+  erstdiagnose_ao: optionalString,
 
-  ergaenzung_kopfverletzung: z.boolean(),
-  ergaenzung_knieverletzung: z.boolean(),
-  ergaenzung_schulterverletzung: z.boolean(),
-  ergaenzung_verbrennung: z.boolean(),
+  // Beurteilung
+  art_da_versorgung: z.string().min(1, "Versorgungsart fehlt"),
+  vorerkrankungen: z.string().min(1, "Vorerkrankungen fehlen"),
 
-  erstdiagnose_icd10: z.string().min(1, "ICD-10 Code fehlt"),
-  erstdiagnose_ao: z.string().min(1, "AO-Klassifikation fehlt"),
+  // Zweifel
+  zweifel_arbeitsunfall: z.boolean().default(false),
+  zweifel_begruendung: optionalString,
 
-  art_da_versorgung: z.string().min(1, "Art der Versorgung fehlt"),
-  vorerkrankungen: z.string().min(1, "Vorerkrankungen fehlen (ggf. 'Keine' eingeben)"),
+  // Heilbehandlung
+  heilbehandlung_art: z.string().min(1, "Heilbehandlung fehlt"),
+  keine_heilbehandlung_grund: optionalString,
+  verletzung_vav: z.boolean().default(false),
+  verletzung_vav_ziffer: optionalString,
+  verletzung_sav: z.boolean().default(false),
+  verletzung_sav_ziffer: optionalString,
 
-  zweifel_arbeitsunfall: z.boolean(),
-  zweifel_begruendung: z.string().optional(),
+  // Weiterbehandlung
+  weiterbehandlung_durch: z.string().min(1, "Weiterbehandlung fehlt"),
+  anderer_arzt_name: optionalString,
+  anderer_arzt_adresse: optionalString,
 
-  heilbehandlung_art: z.string().min(1, "Art der Heilbehandlung fehlt"),
-  keine_heilbehandlung_grund: z.string().optional(),
+  // Arbeitsfähigkeit
+  arbeitsfaehig: z.boolean().nullable().optional(),
+  arbeitsunfaehig_ab: optionalDateSchema,
+  arbeitsfaehig_ab: optionalDateSchema,
+  au_laenger_3_monate: z.boolean().default(false),
 
-  verletzung_vav: z.boolean(),
-  verletzung_vav_ziffer: z.string().optional(),
-  verletzung_sav: z.boolean(),
-  verletzung_sav_ziffer: z.string().optional(),
+  // Weitere Ärzte
+  weitere_aerzte_noetig: z.boolean().default(false),
+  weitere_aerzte_namen: optionalString,
 
-  weiterbehandlung_durch: z.string().min(1, "Weiterbehandlung durch wen?"),
-  anderer_arzt_name: z.string().optional(),
-  anderer_arzt_adresse: z.string().optional(),
-
-  arbeitsfaehig: z.boolean().nullable(),
-  arbeitsunfaehig_ab: z.string().optional(),
-  arbeitsfaehig_ab: z.string().optional(),
-  au_laenger_3_monate: z.boolean(),
-
-  weitere_aerzte_noetig: z.boolean(),
-  weitere_aerzte_namen: z.string().optional(),
-
+  // Wiedervorstellung
   wiedervorstellung_datum: dateSchema,
-  wiedervorstellung_mitgeteilt: z.boolean(),
+  wiedervorstellung_mitgeteilt: z.boolean().default(false),
 
-  bemerkungen: z.string().optional(),
-  weitere_ausfuehrungen: z.string().optional(),
+  // Bemerkungen
+  bemerkungen: optionalString,
 
-  mitteilung_behandelnder_arzt: z.string().min(1, "Name/Stempel ist Pflicht"),
-  datum_mitteilung_behandelnder_arzt: dateSchema,
-  datenschutz_hinweis_gegeben: z.boolean(),
+  // Abschluss
+  weitere_ausfuehrungen: optionalString,
+  mitteilung_behandelnder_arzt: optionalString,
+  datum_mitteilung_behandelnder_arzt: optionalDateSchema,
+  datenschutz_hinweis_gegeben: z.boolean().default(false),
 });
 
-{/** Schema für die ersten Schritte des Formulars */}
+// ==========================================
+// STEP SCHEMAS
+// ==========================================
 
 export const step1Schema = z.object({
-  patient: patientSchema.pick({
-    vorname: true,
-    nachname: true,
-    geburtsdatum: true,
-    geschlecht: true,
-    telefon: true,
-    strasse: true,
-    plz: true,
-    ort: true,
-    staatsangehoerigkeit: true,
-    beschaeftigt_als: true,
-    beschaeftigt_seit: true,
-  }),
-  bericht: z.object({
-    lfd_nr: z.string().min(1),
+  patient: patientSchema,
+  bericht: z.object({ 
+    lfd_nr: z.string().min(1, "Lfd. Nr. fehlt") 
   }),
 });
 
-{/** Schema für den zweiten Schritt des Formulars */}
 export const step2Schema = z.object({
-  krankenkasse: krankenkasseSchema.pick({
-    name: true,
-    kuerzel: true,
-    ik_nummer: true,
+  krankenkasse: krankenkasseSchema,
+  unfallbetrieb: unfallbetriebSchema,
+  uv_traeger: uvTraegerSchema,
+  bericht: z.object({ ist_pflegeunfall: z.boolean() }),
+  patient: z.object({ 
+    pflegekasse: optionalString, 
+    familienversichert: z.boolean(),
+    familienversichert_name: optionalString 
   }),
-  unfallbetrieb: unfallbetriebSchema.pick({
-    name: true,
-    strasse: true,
-    plz: true,
-    ort: true,
-    telefon: true,
-    branche: true,
-  }),
-  uv_traeger: uvTraegerSchema.pick({
-    name: true,
-    kuerzel: true,
-    adresse: true,
-    telefon: true,
-    email: true,
-  }),
-  bericht: berichtBaseSchema.pick({
-    ist_pflegeunfall:true,
-  }),
-  patient: patientSchema.pick({
-    pflegekasse: true,
-    familienversichert: true,
-    familienversichert_name: true,
-  }),
-})
-.superRefine((data, ctx) => {
-    const b = data.bericht;
-    const p = data.patient;
+}).superRefine((data, ctx) => {
+  if (data.bericht.ist_pflegeunfall && !data.patient.pflegekasse) {
+    ctx.addIssue({ 
+      code: z.ZodIssueCode.custom, 
+      message: "Pflichtfeld", 
+      path: ["patient", "pflegekasse"] 
+    });
+  }
+  if (data.patient.familienversichert && !data.patient.familienversichert_name) {
+    ctx.addIssue({ 
+      code: z.ZodIssueCode.custom, 
+      message: "Pflichtfeld", 
+      path: ["patient", "familienversichert_name"] 
+    });
+  }
+});
 
-    // Pflegekasse
-    if (b.ist_pflegeunfall && !p.pflegekasse?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Bei Pflegeunfall ist die Pflegekasse Pflicht", path: ["patient", "pflegekasse"] });
-    }
-  });
-
-{/** Schema für den dritten Schritt des Formulars */}
 export const step3Schema = z.object({
-  bericht: berichtBaseSchema.pick({
+  bericht: berichtSchema.pick({
     unfalltag: true,
-    unfallzeit: true, 
+    unfallzeit: true,
     arbeitszeit_beginn: true,
     arbeitszeit_ende: true,
     unfallort: true,
@@ -210,28 +201,22 @@ export const step3Schema = z.object({
     verdacht_alkohol_drogen: true,
     alkohol_drogen_anzeichen: true,
     blutentnahme_durchgefuehrt: true,
-    beschwerden_klagen: true,
     klinische_befunde: true,
     bildgebende_diagnostik: true,
     erstdiagnose_freitext: true,
-    }),
+  }),
+}).superRefine((data, ctx) => {
+  if (data.bericht.verdacht_alkohol_drogen && !data.bericht.alkohol_drogen_anzeichen) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Anzeichen angeben",
+      path: ["bericht", "alkohol_drogen_anzeichen"],
+    });
+  }
+});
 
-})
-.superRefine((data, ctx) => {
-    const b = data.bericht;
-
-    // Alkohol
-    if (b.verdacht_alkohol_drogen && !b.alkohol_drogen_anzeichen?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Bitte Anzeichen angeben", path: ["bericht", "alkohol_drogen_anzeichen"] });
-    }
-  });
-
-  const berichtDraftSchema = berichtBaseSchema.partial();
-
-{/** Schema für den vierten Schritt des Formulars */}
 export const step4Schema = z.object({
-
-  bericht: berichtDraftSchema.pick({
+  bericht: berichtSchema.pick({
     handverletzung: true,
     gebrauchshand: true,
     polytrauma: true,
@@ -248,142 +233,151 @@ export const step4Schema = z.object({
     zweifel_begruendung: true,
     heilbehandlung_art: true,
     keine_heilbehandlung_grund: true,
-    verletzung_vav: true, 
+    verletzung_vav: true,
     verletzung_vav_ziffer: true,
     verletzung_sav: true,
     verletzung_sav_ziffer: true,
-    arbeitsfaehig: true,
-    arbeitsunfaehig_ab: true,
-    arbeitsfaehig_ab:true,
-    au_laenger_3_monate: true,
     weiterbehandlung_durch: true,
     anderer_arzt_name: true,
     anderer_arzt_adresse: true,
-    wiedervorstellung_datum: true,
-    wiedervorstellung_mitgeteilt: true,
+    arbeitsfaehig: true,
+    arbeitsunfaehig_ab: true,
+    arbeitsfaehig_ab: true,
+    au_laenger_3_monate: true,
     weitere_aerzte_noetig: true,
     weitere_aerzte_namen: true,
+    wiedervorstellung_datum: true,
+    wiedervorstellung_mitgeteilt: true,
     bemerkungen: true,
-    }),
-})
-.superRefine((data, ctx) => {
-    const b = data.bericht;
+  }),
+}).superRefine((data, ctx) => {
+  const b = data.bericht;
 
-    // Handverletzung
-    if (b.handverletzung && !b.gebrauchshand?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Bitte Gebrauchshand angeben", path: ["bericht", "gebrauchshand"] });
-    }
-
-    // Polytrauma
-    if (b.polytrauma && !b.iss_score?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Bitte ISS-Score angeben", path: ["bericht", "iss_score"] });
-    }
-
-    // Zweifel
-    if (b.zweifel_arbeitsunfall && !b.zweifel_begruendung?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Bitte Zweifel begründen", path: ["bericht", "zweifel_begruendung"] });
-    }
-
-    // Heilbehandlung "keine"
-    if (b.heilbehandlung_art === "keine" && !b.keine_heilbehandlung_grund?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Bitte Begründung angeben", path: ["bericht", "keine_heilbehandlung_grund"] });
-    }
-
-    // VAV/SAV
-    if (b.verletzung_vav && !b.verletzung_vav_ziffer?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "VAV-Ziffer fehlt", path: ["bericht", "verletzung_vav_ziffer"] });
-    }
-    if (b.verletzung_sav && !b.verletzung_sav_ziffer?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "SAV-Ziffer fehlt", path: ["bericht", "verletzung_sav_ziffer"] });
-    }
-
-    // Weiterbehandlung anderer Arzt
-    if (b.weiterbehandlung_durch === "andere_arzt") {
-      if (!b.anderer_arzt_name?.trim()) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Name fehlt", path: ["bericht", "anderer_arzt_name"] });
-      if (!b.anderer_arzt_adresse?.trim()) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Anschrift fehlt", path: ["bericht", "anderer_arzt_adresse"] });
-    }
-
-    // AU: Status muss gewählt sein
-     if (data.bericht.arbeitsfaehig === false) {
-    if (!data.bericht.arbeitsunfaehig_ab) {
-      ctx.addIssue({
-        path: ["bericht", "arbeitsunfaehig_ab"],
-        message: "Pflichtfeld bei Arbeitsunfähigkeit",
-        code: z.ZodIssueCode.custom,
-      });
-    }
-
-    if (!data.bericht.arbeitsfaehig_ab) {
-      ctx.addIssue({
-        path: ["bericht", "arbeitsfaehig_ab"],
-        message: "Pflichtfeld bei Arbeitsunfähigkeit",
-        code: z.ZodIssueCode.custom,
-      });
-    }
+  // Harte Pflichtfelder
+  if (!b.art_da_versorgung) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Versorgungsart fehlt", path: ["bericht", "art_da_versorgung"] });
   }
-    // Optional: Prognose Pflicht machen, wenn du willst:
-    // if (b.arbeitsfaehig === false && !b.arbeitsfaehig_ab?.trim()) { ... }
+  if (!b.vorerkrankungen) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Angabe fehlt", path: ["bericht", "vorerkrankungen"] });
+  }
+  if (!b.heilbehandlung_art) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Wählen Sie eine Art", path: ["bericht", "heilbehandlung_art"] });
+  }
+  if (!b.weiterbehandlung_durch) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Auswahl fehlt", path: ["bericht", "weiterbehandlung_durch"] });
+  }
+  if (!b.wiedervorstellung_datum) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Datum fehlt", path: ["bericht", "wiedervorstellung_datum"] });
+  }
+  if (b.arbeitsfaehig === null || b.arbeitsfaehig === undefined) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Status wählen", path: ["bericht", "arbeitsfaehig"] });
+  }
 
-    // Weitere Ärzte
-    if (b.weitere_aerzte_noetig && !b.weitere_aerzte_namen?.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Bitte Namen/Fachgebiet angeben", path: ["bericht", "weitere_aerzte_namen"] });
-    }
+  // Bedingte Pflichtfelder
+  const isSevereInjury = b.handverletzung || b.polytrauma;
+  if (isSevereInjury) {
+    if (!b.erstdiagnose_icd10) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "ICD fehlt", path: ["bericht", "erstdiagnose_icd10"] });
+    if (!b.erstdiagnose_ao) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "AO fehlt", path: ["bericht", "erstdiagnose_ao"] });
+  }
 
-    // Wiedervorstellung mitgeteilt muss true sein
-    if (b.wiedervorstellung_mitgeteilt !== true) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Terminmitteilung muss bestätigt werden", path: ["bericht", "wiedervorstellung_mitgeteilt"] });
-    }
+  if (b.handverletzung && !b.gebrauchshand) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Gebrauchshand wählen", path: ["bericht", "gebrauchshand"] });
+  }
 
-    
-  })
+  if (b.polytrauma && !b.iss_score) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "ISS-Score fehlt", path: ["bericht", "iss_score"] });
+  }
 
-{/** Schema für den fünften Schritt des Formulars */}
+  if (b.zweifel_arbeitsunfall && !b.zweifel_begruendung) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Begründung fehlt", path: ["bericht", "zweifel_begruendung"] });
+  }
+
+  if (b.heilbehandlung_art === "keine" && !b.keine_heilbehandlung_grund) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Begründung fehlt", path: ["bericht", "keine_heilbehandlung_grund"] });
+  }
+
+  if (b.verletzung_vav && !b.verletzung_vav_ziffer) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Ziffer fehlt", path: ["bericht", "verletzung_vav_ziffer"] });
+  }
+
+  if (b.verletzung_sav && !b.verletzung_sav_ziffer) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Ziffer fehlt", path: ["bericht", "verletzung_sav_ziffer"] });
+  }
+
+  if (b.weiterbehandlung_durch === "andere_arzt") {
+    if (!b.anderer_arzt_name) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Name fehlt", path: ["bericht", "anderer_arzt_name"] });
+    if (!b.anderer_arzt_adresse) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Anschrift fehlt", path: ["bericht", "anderer_arzt_adresse"] });
+  }
+
+  if (b.arbeitsfaehig === false) {
+    if (!b.arbeitsunfaehig_ab) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Datum fehlt", path: ["bericht", "arbeitsunfaehig_ab"] });
+    if (!b.arbeitsfaehig_ab) ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Datum fehlt", path: ["bericht", "arbeitsfaehig_ab"] });
+  }
+
+  if (b.weitere_aerzte_noetig && !b.weitere_aerzte_namen) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Name/Fachgebiet fehlt", path: ["bericht", "weitere_aerzte_namen"] });
+  }
+
+  if (!b.wiedervorstellung_mitgeteilt) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Bitte bestätigen", path: ["bericht", "wiedervorstellung_mitgeteilt"] });
+  }
+});
+
 export const step5Schema = z.object({
-  bericht: berichtBaseSchema.pick({
+  bericht: berichtSchema.pick({
     weitere_ausfuehrungen: true,
     mitteilung_behandelnder_arzt: true,
     datum_mitteilung_behandelnder_arzt: true,
-    datenschutz_hinweis_gegeben: true, 
+    datenschutz_hinweis_gegeben: true,
+    lfd_nr: true,
+    unfalltag: true,
     ergaenzung_kopfverletzung: true,
     ergaenzung_knieverletzung: true,
     ergaenzung_schulterverletzung: true,
     ergaenzung_verbrennung: true,
-    lfd_nr:true,
-    unfalltag: true,   
   }),
-  patient: patientSchema.pick({
-    nachname: true,
-    vorname: true,
-    geburtsdatum: true,
+  patient: patientSchema.pick({ 
+    nachname: true, 
+    vorname: true, 
+    geburtsdatum: true 
   }),
-})
-.superRefine((data, ctx) => {
-    const b = data.bericht;
-    // Datenschutz muss true sein
-    if (b.datenschutz_hinweis_gegeben !== true) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Datenschutz-Hinweis muss bestätigt werden", path: ["bericht", "datenschutz_hinweis_gegeben"] });
-    }
-  });
+}).superRefine((data, ctx) => {
+  if (!data.bericht.datenschutz_hinweis_gegeben) {
+    ctx.addIssue({ 
+      code: z.ZodIssueCode.custom, 
+      message: "Pflichtfeld", 
+      path: ["bericht", "datenschutz_hinweis_gegeben"] 
+    });
+  }
+  if (!data.bericht.datum_mitteilung_behandelnder_arzt) {
+    ctx.addIssue({ 
+      code: z.ZodIssueCode.custom, 
+      message: "Datum fehlt", 
+      path: ["bericht", "datum_mitteilung_behandelnder_arzt"] 
+    });
+  }
+  if (!data.bericht.mitteilung_behandelnder_arzt) {
+    ctx.addIssue({ 
+      code: z.ZodIssueCode.custom, 
+      message: "Angaben fehlen", 
+      path: ["bericht", "mitteilung_behandelnder_arzt"] 
+    });
+  }
+});
 
+// Full Schema
+export const fullReportSchema = z.object({
+  patient: patientSchema,
+  krankenkasse: krankenkasseSchema,
+  unfallbetrieb: unfallbetriebSchema,
+  uv_traeger: uvTraegerSchema,
+  bericht: berichtSchema,
+});
 
-
+// Types
+export type ReportFormValues = z.infer<typeof fullReportSchema>;
 export type Step1Values = z.infer<typeof step1Schema>;
 export type Step2Values = z.infer<typeof step2Schema>;
 export type Step3Values = z.infer<typeof step3Schema>;
 export type Step4Values = z.infer<typeof step4Schema>;
 export type Step5Values = z.infer<typeof step5Schema>;
-
-export type ReportFormValues = {
-    patient: z.infer<typeof patientSchema>;
-    krankenkasse: z.infer<typeof krankenkasseSchema>;
-    unfallbetrieb: z.infer<typeof unfallbetriebSchema>;
-    uv_traeger: z.infer<typeof uvTraegerSchema>;
-    bericht: z.infer<typeof berichtBaseSchema>;
-};
-
-
-
-
-
-
-  

@@ -18,9 +18,13 @@ async function proxyRequest(
   const url = `${BACKEND_URL}/api/${pathString}${searchParams ? `?${searchParams}` : ''}`;
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
   };
+
+  // Content-Type nur für JSON-Requests setzen
+  if (['POST', 'PUT', 'PATCH'].includes(method)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const body = ['POST', 'PUT', 'PATCH'].includes(method)
     ? await request.text()
@@ -31,6 +35,37 @@ async function proxyRequest(
     headers,
     body,
   });
+
+  // Content-Type vom Backend prüfen
+  const contentType = response.headers.get('Content-Type') || '';
+
+  // PDF oder andere binäre Daten direkt weiterleiten
+  if (contentType.includes('application/pdf') || 
+      contentType.includes('application/octet-stream') ||
+      contentType.includes('image/')) {
+    
+    const buffer = await response.arrayBuffer();
+    
+    // Alle relevanten Headers übernehmen
+    const responseHeaders: Record<string, string> = {
+      'Content-Type': contentType,
+    };
+    
+    const contentDisposition = response.headers.get('Content-Disposition');
+    if (contentDisposition) {
+      responseHeaders['Content-Disposition'] = contentDisposition;
+    }
+    
+    return new NextResponse(buffer, {
+      status: response.status,
+      headers: responseHeaders,
+    });
+  }
+
+  // JSON-Responses wie bisher
+  if (response.status === 204) {
+    return new NextResponse(null, { status: 204 });
+  }
 
   const data = await response.json().catch(() => ({}));
 

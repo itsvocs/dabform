@@ -1,18 +1,17 @@
-// app/formular-seiten/Step3Form.tsx
 "use client";
 
 import { useFormContext, useWatch } from "react-hook-form";
 import { ReportFormValues } from "./schemas";
-// WICHTIG: Keine globals.css hier importieren, das passiert im layout.tsx
-import { Section, Label, Input, Textarea, Checkbox, DebugPanel } from "./FormUI";
 
-export function Step3Form({
-  onNext,
-  onBack,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-}) {
+// shadcn/ui Components
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
+
+export function Step3Form() {
   const {
     register,
     setValue,
@@ -20,232 +19,327 @@ export function Step3Form({
     formState: { errors },
   } = useFormContext<ReportFormValues>();
 
-  // ===== WATCHER =====
-  const verdachtAlkohol = useWatch({
-    control,
-    name: "bericht.verdacht_alkohol_drogen",
-  });
+  // Watched Values
+  const verdachtAlkohol = useWatch({ control, name: "bericht.verdacht_alkohol_drogen" });
+  const blutentnahme = useWatch({ control, name: "bericht.blutentnahme_durchgefuehrt" });
+
+  const getDisabledClass = (isActive: boolean) =>
+    cn("transition-opacity duration-200", isActive ? "opacity-100" : "opacity-50 pointer-events-none");
 
   return (
-    <form className="space-y-6">
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
-        
-        {/* ===================================================== */}
-        {/* UNFALLDATEN */}
-        {/* ===================================================== */}
-        <Section title="Unfallhergang" subtitle="Wann und wo ist der Unfall passiert?">
-          <div className="grid grid-cols-1 gap-6">
-            
-            {/* Zeitangaben im Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label required>Unfalltag</Label>
-                <Input 
-                  type="date" 
-                  {...register("bericht.unfalltag")} 
-                  error={errors.bericht?.unfalltag?.message}
-                />
-              </div>
-              <div>
-                <Label required>Unfallzeit</Label>
-                <Input 
-                  type="time" 
-                  {...register("bericht.unfallzeit")} 
-                  error={errors.bericht?.unfallzeit?.message}
-                />
-              </div>
+    <>
+      {/* UNFALLHERGANG */}
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-3 py-8">
+        <div>
+          <h2 className="text-base font-semibold leading-7 text-foreground">
+            Unfallhergang
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Wann, wo und wie ist der Unfall passiert?
+          </p>
+        </div>
+
+        <div className="md:col-span-2">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+            <div className="col-span-full sm:col-span-3">
+              <Label htmlFor="unfalltag">
+                1. Unfalltag <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="unfalltag"
+                type="date"
+                className="mt-2"
+                {...register("bericht.unfalltag")}
+              />
+              {errors.bericht?.unfalltag && (
+                <p className="text-sm text-destructive mt-1">{errors.bericht.unfalltag.message}</p>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label required>Arbeitszeit Beginn</Label>
-                <Input 
-                  type="time" 
-                  {...register("bericht.arbeitszeit_beginn")} 
-                />
-              </div>
-              <div>
-                <Label required>Arbeitszeit Ende</Label>
-                <Input 
-                  type="time" 
-                  {...register("bericht.arbeitszeit_ende")} 
-                />
-              </div>
+            <div className="col-span-full sm:col-span-3">
+              <Label htmlFor="unfallzeit">
+                Unfallzeit <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="unfallzeit"
+                type="time"
+                className="mt-2"
+                {...register("bericht.unfallzeit")}
+              />
+              {errors.bericht?.unfallzeit && (
+                <p className="text-sm text-destructive mt-1">{errors.bericht.unfallzeit.message}</p>
+              )}
             </div>
 
-            {/* Ort & Hergang */}
-            <div>
-              <Label required>Unfallort</Label>
-              <Input 
-                placeholder="Genaue Ortsangabe (Gebäude, Raum, Straße)"
-                {...register("bericht.unfallort")} 
-                error={errors.bericht?.unfallort?.message}
+            <div className="col-span-full sm:col-span-3">
+              <Label htmlFor="arbeitszeit_beginn">Arbeitsbeginn am</Label>
+              <Input
+                id="arbeitszeit_beginn"
+                type="time"
+                className="mt-2"
+                {...register("bericht.arbeitszeit_beginn")}
               />
             </div>
 
-            <div>
-              <Label required>Unfallhergang</Label>
-              <Textarea 
-                placeholder="Schilderung des Unfallhergangs..."
-                className="min-h-[120px]"
-                {...register("bericht.unfallhergang")} 
-                error={errors.bericht?.unfallhergang?.message}
+            <div className="col-span-full sm:col-span-3">
+              <Label htmlFor="arbeitszeit_ende">Arbeitsende am</Label>
+              <Input
+                id="arbeitszeit_ende"
+                type="time"
+                className="mt-2"
+                {...register("bericht.arbeitszeit_ende")}
               />
+            </div>
+
+            <div className="col-span-full sm:col-span-3">
+              <Label htmlFor="unfallort">
+                Unfallort <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="unfallort"
+                placeholder="Gebäude, Raum, Straße …"
+                className="mt-2"
+                {...register("bericht.unfallort")}
+              />
+              {errors.bericht?.unfallort && (
+                <p className="text-sm text-destructive mt-1">{errors.bericht.unfallort.message}</p>
+              )}
+            </div>
+
+            <div className="col-span-full">
+              <Label htmlFor="unfallhergang">
+                2. Angaben zum Unfallhergang <span className="text-destructive">*</span>
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Angaben der versicherten Person zum Unfallhergang und zur Tätigkeit
+              </p>
+              <Textarea
+                id="unfallhergang"
+                className="mt-2 min-h-[120px]"
+                {...register("bericht.unfallhergang")}
+              />
+              {errors.bericht?.unfallhergang && (
+                <p className="text-sm text-destructive mt-1">{errors.bericht.unfallhergang.message}</p>
+              )}
             </div>
           </div>
-        </Section>
+        </div>
+      </div>
 
-        {/* ===================================================== */}
-        {/* ERSTVERSORGUNG */}
-        {/* ===================================================== */}
-        <Section title="Erstversorgung" subtitle="Maßnahmen unmittelbar nach dem Unfall">
-          <div className="grid grid-cols-1 gap-6">
-            <div>
-              <Label required>Verhalten nach Unfall</Label>
-              <Textarea 
-                placeholder="z.B. Arbeit eingestellt, weitergearbeitet..."
-                {...register("bericht.verhalten_nach_unfall")} 
-                error={errors.bericht?.verhalten_nach_unfall?.message}
+      <Separator />
+
+      {/* ERSTVERSORGUNG */}
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-3 py-8">
+        <div>
+          <h2 className="text-base font-semibold leading-7 text-foreground">
+            Erstversorgung
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Maßnahmen unmittelbar nach dem Unfall
+          </p>
+        </div>
+
+        <div className="md:col-span-2">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+            <div className="col-span-full">
+              <Label htmlFor="verhalten_nach_unfall">
+                3. Verhalten nach dem Unfall <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="verhalten_nach_unfall"
+                className="mt-2 min-h-[80px]"
+                {...register("bericht.verhalten_nach_unfall")}
               />
+              {errors.bericht?.verhalten_nach_unfall && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.bericht.verhalten_nach_unfall.message}
+                </p>
+              )}
             </div>
 
-            <div>
-              <Label required>Art der Erstversorgung</Label>
-              <Textarea 
-                placeholder="z.B. Wundverband angelegt..."
-                {...register("bericht.art_erstversorgung")} 
-                error={errors.bericht?.art_erstversorgung?.message}
+            <div className="col-span-full">
+              <Label htmlFor="art_erstversorgung">
+                4.1 Art der ersten Versorgung <span className="text-destructive">*</span>
+              </Label>
+              <Textarea
+                id="art_erstversorgung"
+                className="mt-2 min-h-[80px]"
+                {...register("bericht.art_erstversorgung")}
               />
+              {errors.bericht?.art_erstversorgung && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.bericht.art_erstversorgung.message}
+                </p>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label required>Erstbehandlung am</Label>
-                <Input 
-                  type="date" 
-                  {...register("bericht.erstbehandlung_datum")} 
-                  error={errors.bericht?.erstbehandlung_datum?.message}
-                />
-              </div>
-              <div>
-                <Label required>Erstbehandlung durch</Label>
-                <Input 
-                  placeholder="Name des Arztes / Ersthelfers"
-                  {...register("bericht.erstbehandlung_durch")} 
-                  error={errors.bericht?.erstbehandlung_durch?.message}
-                />
-              </div>
+            <div className="col-span-full sm:col-span-3">
+              <Label htmlFor="erstbehandlung_datum">
+                4.2 Erstmalig behandelt am <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="erstbehandlung_datum"
+                type="date"
+                className="mt-2"
+                {...register("bericht.erstbehandlung_datum")}
+              />
+              {errors.bericht?.erstbehandlung_datum && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.bericht.erstbehandlung_datum.message}
+                </p>
+              )}
+            </div>
+
+            <div className="col-span-full sm:col-span-3">
+              <Label htmlFor="erstbehandlung_durch">
+                Durch (Arzt / Einrichtung) <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="erstbehandlung_durch"
+                className="mt-2"
+                {...register("bericht.erstbehandlung_durch")}
+              />
+              {errors.bericht?.erstbehandlung_durch && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.bericht.erstbehandlung_durch.message}
+                </p>
+              )}
             </div>
           </div>
-        </Section>
+        </div>
+      </div>
 
-        {/* ===================================================== */}
-        {/* BEFUND & DIAGNOSE */}
-        {/* ===================================================== */}
-        <Section title="Befund & Diagnose" subtitle="Medizinische Feststellungen">
-          <div className="grid grid-cols-1 gap-6">
-            
-            {/* ALKOHOL / DROGEN (Styled Box) */}
-            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-              <div className="flex flex-col gap-4">
-                <Label>Besteht Verdacht auf Alkohol- oder Drogeneinfluss?</Label>
-                
-                <div className="flex gap-6">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={verdachtAlkohol === true}
-                      onChange={() => setValue("bericht.verdacht_alkohol_drogen", true)}
-                      id="alkohol-ja"
-                    />
-                    <label htmlFor="alkohol-ja" className="text-sm cursor-pointer">Ja</label>
-                  </div>
+      <Separator />
 
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={verdachtAlkohol === false}
-                      onChange={() => {
-                        setValue("bericht.verdacht_alkohol_drogen", false);
-                        setValue("bericht.alkohol_drogen_anzeichen", "");
-                      }}
-                      id="alkohol-nein"
-                    />
-                    <label htmlFor="alkohol-nein" className="text-sm cursor-pointer">Nein</label>
-                  </div>
+      {/* BEFUNDE */}
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-3 py-8">
+        <div>
+          <h2 className="text-base font-semibold leading-7 text-foreground">
+            Befunde und Diagnose
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Medizinische Feststellungen
+          </p>
+        </div>
+
+        <div className="md:col-span-2">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+            {/* Alkohol/Drogen Verdacht */}
+            <div className="col-span-full sm:col-span-3">
+              <Label>5. Verdacht auf Alkohol/Drogen?</Label>
+              <div className="flex gap-6 mt-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="alkohol_ja"
+                    checked={verdachtAlkohol === true}
+                    onCheckedChange={() =>
+                      setValue("bericht.verdacht_alkohol_drogen", true, { shouldValidate: true })
+                    }
+                  />
+                  <Label htmlFor="alkohol_ja" className="cursor-pointer font-normal">
+                    Ja
+                  </Label>
                 </div>
-
-                {verdachtAlkohol && (
-                  <div className="animate-in slide-in-from-top-2 fade-in duration-300">
-                    <Label required>Welche Anzeichen?</Label>
-                    <Input
-                      placeholder="z.B. Alkoholgeruch, verwaschene Sprache"
-                      {...register("bericht.alkohol_drogen_anzeichen")}
-                      error={errors.bericht?.alkohol_drogen_anzeichen?.message}
-                    />
-                  </div>
-                )}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="alkohol_nein"
+                    checked={verdachtAlkohol === false}
+                    onCheckedChange={() => {
+                      setValue("bericht.verdacht_alkohol_drogen", false, { shouldValidate: true });
+                      setValue("bericht.alkohol_drogen_anzeichen", "");
+                      setValue("bericht.blutentnahme_durchgefuehrt", false);
+                    }}
+                  />
+                  <Label htmlFor="alkohol_nein" className="cursor-pointer font-normal">
+                    Nein
+                  </Label>
+                </div>
               </div>
             </div>
 
-            {/* Diagnosen */}
-            <div>
-              <Label required>Beschwerden / Klagen des Patienten</Label>
-              <Textarea 
-                {...register("bericht.beschwerden_klagen")} 
-                error={errors.bericht?.beschwerden_klagen?.message}
+            {/* Anzeichen */}
+            <div className={cn("col-span-full sm:col-span-3", getDisabledClass(verdachtAlkohol === true))}>
+              <Label htmlFor="alkohol_anzeichen">
+                Welche Anzeichen? {verdachtAlkohol && <span className="text-destructive">*</span>}
+              </Label>
+              <Input
+                id="alkohol_anzeichen"
+                placeholder="Geruch, Verhalten..."
+                className="mt-2"
+                disabled={!verdachtAlkohol}
+                {...register("bericht.alkohol_drogen_anzeichen")}
+              />
+              {errors.bericht?.alkohol_drogen_anzeichen && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.bericht.alkohol_drogen_anzeichen.message}
+                </p>
+              )}
+            </div>
+
+            {/* Blutentnahme */}
+            <div className={cn("col-span-full sm:col-span-3", getDisabledClass(verdachtAlkohol === true))}>
+              <Label>Blutentnahme durchgeführt?</Label>
+              <div className="flex gap-6 mt-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="blut_ja"
+                    checked={blutentnahme === true}
+                    onCheckedChange={() => setValue("bericht.blutentnahme_durchgefuehrt", true)}
+                    disabled={!verdachtAlkohol}
+                  />
+                  <Label htmlFor="blut_ja" className="cursor-pointer font-normal">
+                    Ja
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="blut_nein"
+                    checked={blutentnahme === false}
+                    onCheckedChange={() => setValue("bericht.blutentnahme_durchgefuehrt", false)}
+                    disabled={!verdachtAlkohol}
+                  />
+                  <Label htmlFor="blut_nein" className="cursor-pointer font-normal">
+                    Nein
+                  </Label>
+                </div>
+              </div>
+            </div>
+
+            {/* Klinische Befunde */}
+            <div className="col-span-full">
+              <Label htmlFor="klinische_befunde">5.2 Klinische Untersuchungsbefunde</Label>
+              <Textarea
+                id="klinische_befunde"
+                className="mt-2 min-h-[100px]"
+                {...register("bericht.klinische_befunde")}
               />
             </div>
 
-            <div>
-              <Label required>Klinische Befunde</Label>
-              <Textarea 
-                {...register("bericht.klinische_befunde")} 
-                error={errors.bericht?.klinische_befunde?.message}
+            {/* Bildgebende Diagnostik */}
+            <div className="col-span-full">
+              <Label htmlFor="bildgebende_diagnostik">6. Ergebnis bildgebender Diagnostik</Label>
+              <Textarea
+                id="bildgebende_diagnostik"
+                className="mt-2 min-h-[100px]"
+                {...register("bericht.bildgebende_diagnostik")}
               />
             </div>
 
-            <div>
-              <Label required>Bildgebende Diagnostik</Label>
-              <Textarea 
-                placeholder="z.B. Röntgen linkes Handgelenk: Keine Fraktur"
-                {...register("bericht.bildgebende_diagnostik")} 
-                error={errors.bericht?.bildgebende_diagnostik?.message}
+            {/* Erstdiagnose */}
+            <div className="col-span-full">
+              <Label htmlFor="erstdiagnose_freitext">7. Erstdiagnose (Freitext)</Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Bei Frakturen AO-Klassifikation angeben
+              </p>
+              <Textarea
+                id="erstdiagnose_freitext"
+                className="mt-2 min-h-[100px]"
+                {...register("bericht.erstdiagnose_freitext")}
               />
             </div>
-
-            <div>
-              <Label required>Erstdiagnose (Freitext)</Label>
-              <Textarea 
-                className="min-h-[100px]"
-                {...register("bericht.erstdiagnose_freitext")} 
-                error={errors.bericht?.erstdiagnose_freitext?.message}
-              />
-            </div>
-
           </div>
-        </Section>
-
+        </div>
       </div>
-
-      {/* Navigation Buttons (Gleicher Style wie Step 2) */}
-      <div className="flex justify-between pt-8 border-t border-slate-100 mt-8">
-        <button 
-          type="button" 
-          onClick={onBack}
-          className="text-slate-600 px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-100 transition-colors"
-        >
-          &larr; Zurück
-        </button>
-
-        <button 
-          type="button" 
-          onClick={onNext}
-          className="bg-slate-900 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition-all shadow-sm hover:shadow-md active:scale-95"
-        >
-          Weiter zu Verfahren &rarr;
-        </button>
-      </div>
-
-      {process.env.NODE_ENV === "development" && <DebugPanel control={control} />}
-    </form>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 """
-Bericht Schemas (vollständig für alle F1000 Felder)
+Bericht Schemas (vollständig für alle F1000 Felder) - ERWEITERT
 """
 
 from typing import Optional
@@ -24,6 +24,9 @@ class BerichtCreate(BerichtBase):
     eingetroffen_datum: Optional[date] = None
     eingetroffen_uhrzeit: Optional[time] = None
     kopie_an_kasse: bool = False
+    
+    # NEU: Pflegeunfall Flag
+    ist_pflegeunfall: bool = False
     
     # Abschnitt 1: Unfalldaten
     unfallzeit: Optional[time] = None
@@ -81,7 +84,7 @@ class BerichtCreate(BerichtBase):
     verletzung_sav_ziffer: Optional[str] = Field(None, max_length=50)
     
     # Abschnitt 12: Weiterbehandlung
-    weiterbehandlung_durch: Optional[str] = Field(None, pattern="^(selbst|anderer_arzt)$")
+    weiterbehandlung_durch: Optional[str] = Field(None, pattern="^(durch_mich|andere_arzt)$")
     anderer_arzt_name: Optional[str] = Field(None, max_length=255)
     anderer_arzt_adresse: Optional[str] = None
     
@@ -108,6 +111,8 @@ class BerichtCreate(BerichtBase):
     # Datenschutz & Verteiler
     datenschutz_hinweis_gegeben: bool = True
     mitteilung_behandelnder_arzt: Optional[str] = None
+    # NEU: Datum der Mitteilung
+    datum_mitteilung_behandelnder_arzt: Optional[date] = None
     
     # Ergänzungsberichte (Checkboxen)
     ergaenzung_kopfverletzung: bool = False
@@ -126,6 +131,9 @@ class BerichtUpdate(BaseModel):
     eingetroffen_datum: Optional[date] = None
     eingetroffen_uhrzeit: Optional[time] = None
     kopie_an_kasse: Optional[bool] = None
+    
+    # NEU: Pflegeunfall Flag
+    ist_pflegeunfall: Optional[bool] = None
     
     # Abschnitt 1: Unfalldaten
     unfalltag: Optional[date] = None
@@ -184,7 +192,7 @@ class BerichtUpdate(BaseModel):
     verletzung_sav_ziffer: Optional[str] = Field(None, max_length=50)
     
     # Abschnitt 12: Weiterbehandlung
-    weiterbehandlung_durch: Optional[str] = Field(None, pattern="^(selbst|anderer_arzt)$")
+    weiterbehandlung_durch: Optional[str] = Field(None, pattern="^(durch_mich|andere_arzt)$")
     anderer_arzt_name: Optional[str] = Field(None, max_length=255)
     anderer_arzt_adresse: Optional[str] = None
     
@@ -211,6 +219,8 @@ class BerichtUpdate(BaseModel):
     # Datenschutz & Verteiler
     datenschutz_hinweis_gegeben: Optional[bool] = None
     mitteilung_behandelnder_arzt: Optional[str] = None
+    # NEU: Datum der Mitteilung
+    datum_mitteilung_behandelnder_arzt: Optional[date] = None
     
     # Ergänzungsberichte (Checkboxen)
     ergaenzung_kopfverletzung: Optional[bool] = None
@@ -233,6 +243,9 @@ class BerichtResponse(BaseModel):
     eingetroffen_datum: Optional[date] = None
     eingetroffen_uhrzeit: Optional[time] = None
     kopie_an_kasse: bool
+    
+    # NEU: Pflegeunfall Flag
+    ist_pflegeunfall: bool
     
     # Abschnitt 1: Unfalldaten
     unfalltag: date
@@ -318,6 +331,8 @@ class BerichtResponse(BaseModel):
     # Datenschutz & Verteiler
     datenschutz_hinweis_gegeben: bool
     mitteilung_behandelnder_arzt: Optional[str] = None
+    # NEU: Datum der Mitteilung
+    datum_mitteilung_behandelnder_arzt: Optional[date] = None
     
     # Ergänzungsberichte (Checkboxen)
     ergaenzung_kopfverletzung: bool

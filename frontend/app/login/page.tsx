@@ -52,7 +52,7 @@ export default function Login() {
                     <p className="mt-2 text-sm text-muted-foreground">
                         Noch kein Konto?{" "}
                         <Link href="/register" className="font-medium text-primary hover:text-primary/90">
-                            Konto erstellen
+                            Konto anfordern
                         </Link>
                     </p>
 

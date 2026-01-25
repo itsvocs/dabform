@@ -1,6 +1,7 @@
 """ Benutzer Model for the Database - DABFORM """
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 # pylint: disable=not-callable
 
 from app.core.database import Base
@@ -35,6 +36,8 @@ class Benutzer(Base):
     praxis_plz = Column(String(10), nullable=True)
     praxis_ort = Column(String(100), nullable=True)
     praxis_telefon = Column(String(50), nullable=True)
+    
+    berichte = relationship("Bericht", back_populates="benutzer", cascade="all, delete-orphan")
 
     # Timestamps
     erstellt_am = Column(DateTime(timezone=True), server_default=func.now())

@@ -6,7 +6,7 @@ Krankenkasse Model - Krankenkassen-Stammdaten
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
 from app.core.database import Base
-
+from sqlalchemy.orm import relationship
 class Krankenkasse(Base):
     """
     Krankenkasse Stammdaten
@@ -27,5 +27,4 @@ class Krankenkasse(Base):
     # Timestamp
     erstellt_am = Column(DateTime(timezone=True), server_default=func.now())
     
-    def __repr__(self):
-        return f"<Krankenkasse(id={self.id}, name='{self.name}')>"
+    patienten = relationship("Patient", back_populates="krankenkasse")

@@ -5,7 +5,7 @@ Application Configuration
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    """Application Settings - Lädt Werte aus .env"""
+    """Application Settings """
 
     # Database
     DATABASE_URL: str = "postgresql://dab_user:dab_password@localhost:5432/dab_form"

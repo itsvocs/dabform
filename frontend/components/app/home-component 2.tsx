@@ -1,0 +1,58 @@
+"use client"
+import { useRouter } from "next/navigation";
+
+
+export function HomeComponent() {
+    const router = useRouter()
+    return (
+        <div className="relative py-32 w-screen  overflow-hidden">
+            {/* Gradient overlay for better text readability */}
+            <div className="absolute inset-0 bg-linear-to-b from-white/40 via-transparent to-white/60 pointer-events-none" />
+
+            {/* Hero content */}
+            <div className="relative z-10 flex h-full flex-col items-center justify-center px-4">
+                <div className="max-w-4xl text-center">
+                    {/* Badge */}
+                    {/* <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/5 px-4 py-1.5 text-sm text-black/70 backdrop-blur-sm">
+                        Introducing AI SaaS Template &rarr;
+                    </div> */}
+
+                    {/* Title */}
+                    <h1 className="mb-6 text-xl font-bold tracking-tight text-foreground sm:text-6xl md:text-8xl">
+                        Digitales Durchgangsarztbericht
+                    </h1>
+
+                    {/* Description */}
+                    <p className="mx-auto mb-10 max-w-2xl text-base text-black/60 sm:text-xl">
+                        Eine Plattform für die einfache Erstellung und Verwaltung digitaler Durchgangsarztberichte für Durchgangsärzte, von allen Geräten und überall erreichbar.
+                    </p>
+
+                    {/* Buttons */}
+                    <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                        <button className="group relative inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-8 text-base font-medium text-white transition-all hover:bg-black/90 hover:scale-105"
+                            onClick={() => router.push("/login")}
+                        >
+                            Jetzt starten
+                            <svg
+                                className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                />
+                            </svg>
+                        </button>
+                        <button className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/20 bg-black/5 px-8 text-base font-medium text-black backdrop-blur-sm transition-all hover:bg-black/10 hover:border-black/30">
+                            Zur Dokumentation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

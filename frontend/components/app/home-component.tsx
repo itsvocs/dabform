@@ -12,14 +12,10 @@ export function HomeComponent() {
             {/* Hero content */}
             <div className="relative z-10 flex h-full flex-col items-center justify-center px-4">
                 <div className="max-w-4xl text-center">
-                    {/* Badge */}
-                    {/* <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/5 px-4 py-1.5 text-sm text-black/70 backdrop-blur-sm">
-                        Introducing AI SaaS Template &rarr;
-                    </div> */}
 
                     {/* Title */}
                     <h1 className="mb-6 text-xl font-bold tracking-tight text-foreground sm:text-6xl md:text-8xl">
-                        Digitales Durchgangsarztbericht
+                        Digitaler Durchgangsarztbericht
                     </h1>
 
                     {/* Description */}
@@ -47,7 +43,9 @@ export function HomeComponent() {
                                 />
                             </svg>
                         </button>
-                        <button className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/20 bg-black/5 px-8 text-base font-medium text-black backdrop-blur-sm transition-all hover:bg-black/10 hover:border-black/30">
+                        <button className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/20 bg-black/5 px-8 text-base font-medium text-black backdrop-blur-sm transition-all hover:bg-black/10 hover:border-black/30"
+                            onClick={() => router.push("https://gitlab.ges.thm.de/lehre/swtp/wise2526/g1_dabform/-/wikis/home")}
+                        >
                             Zur Dokumentation
                         </button>
                     </div>

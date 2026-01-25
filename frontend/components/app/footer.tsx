@@ -5,8 +5,8 @@ const links: { title: string, href: string }[] = [
         title: 'Gitlab',
         href: 'https://gitlab.ges.thm.de/lehre/swtp/wise2526/g1_dabform',
     }, {
-        title: 'Github',
-        href: 'https://gitlab.ges.thm.de/lehre/swtp/wise2526/g1_dabform',
+        title: 'License',
+        href: 'https://www.mit.edu/~amini/LICENSE.md',
     },
     {
         title: 'Dabform V1.0.0',
