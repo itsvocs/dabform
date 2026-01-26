@@ -19,6 +19,7 @@ import {
 } from "./schemas";
 import {
   berichteApi,
+  krankenkassenApi,
   patientenApi,
   pdfApi,
   // krankenkassenApi,
@@ -381,34 +382,34 @@ export default function FormularPage({ berichtId }: FormularPageProps) {
     }
   };
 
-  // const saveKrankenkasse = async (): Promise<number | undefined> => {
-  //   const data = getValues("krankenkasse");
-  //   if (!data.name || !data.ik_nummer) return undefined;
+  const saveKrankenkasse = async (): Promise<number | undefined> => {
+    const data = getValues("krankenkasse");
+    if (!data.name || !data.ik_nummer) return undefined;
 
-  //   if (krankenkasseId) {
-  //     return krankenkasseId;
-  //   }
+    if (krankenkasseId) {
+      return krankenkasseId;
+    }
 
-  //   try {
-  //     const newKK = await krankenkassenApi.create({
-  //       name: data.name,
-  //       kuerzel: data.kuerzel,
-  //       ik_nummer: data.ik_nummer,
-  //     });
-  //     setKrankenkasseId(newKK.id);
-  //     return newKK.id;
-  //   } catch (e) {
-  //     // IK-Nummer existiert schon - suchen und ID zurückgeben
-  //     console.log(e);
+    try {
+      const newKK = await krankenkassenApi.create({
+        name: data.name,
+        kuerzel: data.kuerzel,
+        ik_nummer: data.ik_nummer,
+      });
+      setKrankenkasseId(newKK.id);
+      return newKK.id;
+    } catch (e) {
+      // IK-Nummer existiert schon - suchen und ID zurückgeben
+      console.log(e);
 
-  //     const existing = await krankenkassenApi.search(data.ik_nummer);
-  //     if (existing.length > 0) {
-  //       setKrankenkasseId(existing[0].id);
-  //       return existing[0].id;
-  //     }
-  //     return undefined;
-  //   }
-  // };
+      const existing = await krankenkassenApi.search(data.ik_nummer);
+      if (existing.length > 0) {
+        setKrankenkasseId(existing[0].id);
+        return existing[0].id;
+      }
+      return undefined;
+    }
+  };
 
   const saveUnfallbetrieb = async (): Promise<number | undefined> => {
     const data = getValues("unfallbetrieb");
@@ -458,7 +459,7 @@ export default function FormularPage({ berichtId }: FormularPageProps) {
       const savedPatientId = await savePatient();
 
       // 2. Andere Entities speichern 
-      // const savedKKId = await saveKrankenkasse();
+      const savedKKId = await saveKrankenkasse();
       const savedUBId = await saveUnfallbetrieb();
       const savedUVId = await saveUvTraeger();
 
@@ -637,27 +638,7 @@ export default function FormularPage({ berichtId }: FormularPageProps) {
           // PDF für UV-Träger herunterladen
           await pdfApi.downloadAndSave(currentBerichtId, 'uv');
 
-          // if (pdfResponse.ok) {
-          //   const blob = await pdfResponse.blob();
-          //   const url = window.URL.createObjectURL(blob);
-          //   const a = document.createElement('a');
-          //   a.href = url;
 
-          //   // Filename aus Content-Disposition Header oder default
-          //   const contentDisposition = pdfResponse.headers.get('Content-Disposition');
-          //   let filename = 'durchgangsarztbericht.pdf';
-          //   if (contentDisposition) {
-          //     const match = contentDisposition.match(/filename="(.+)"/);
-          //     if (match) {
-          //       filename = match[1];
-          //     }
-          //   }
-
-          //   a.download = filename;
-          //   document.body.appendChild(a);
-          //   a.click();
-          //   window.URL.revokeObjectURL(url);
-          //   document.body.removeChild(a);
 
           // setLoadingPDF(false)
           toastManager.add({
@@ -665,13 +646,6 @@ export default function FormularPage({ berichtId }: FormularPageProps) {
             description: "Bericht wurde abgeschlossen und PDF heruntergeladen!",
             type: "success"
           });
-          // } else {
-          // setLoadingPDF(false)
-          // toastManager.add({
-          //   title: "Warning",
-          //   description: "Bericht abgeschlossen. PDF konnte nicht generiert werden.",
-          //   type: "warning"
-          // });
         }
         catch (pdfError) {
           // setLoadingPDF(false)

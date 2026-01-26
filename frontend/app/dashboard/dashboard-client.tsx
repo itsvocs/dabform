@@ -1,20 +1,54 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import {
-  Trash2,
-  FileText,
-  Play,
-  AlertTriangle,
-  X,
+  FileText as FileTextIcon,
   Search,
-  NotepadTextDashed,
-  FileCheck,
+  Trash2 as Trash2Icon,
+  FileText,
+  Archive,
+  FileCheck2Icon,
+  FilePen,
+  Download,
 } from "lucide-react";
-// import { berichteApi } from "@/lib/api";
+
 import type { User, Bericht } from "@/types";
+
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipPopup,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  berichteToCsvAllFields,
+  downloadTextFile,
+  // parseCsvAll,
+  // csvRowToBerichtPatch,
+} from "@/lib/csv";
+// import { useRef } from "react";
+
+import { Spinner } from "@/components/ui/spinner";
+import { Menu, MenuItem, MenuPopup, MenuSub, MenuSubPopup, MenuSubTrigger, MenuTrigger } from "@/components/ui/menu";
+import { useRouter } from "next/navigation";
+import { AlertDialog, AlertDialogClose, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogPopup, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { berichteApi, pdfApi } from "@/lib/api";
+import { toastManager } from "@/components/ui/toast";
 
 interface DashboardClientProps {
   user: User;
@@ -22,125 +56,165 @@ interface DashboardClientProps {
 }
 
 type BerichtStatus = "entwurf" | "abgeschlossen";
+type BerichtType = "kk" | "uv"
 
-export default function DashboardClient({ user, initialBerichte }: DashboardClientProps) {
+export default function DashboardClient({
+  user,
+  initialBerichte,
+}: DashboardClientProps) {
+
   const [berichte, setBerichte] = useState<Bericht[]>(initialBerichte);
   const [searchTerm, setSearchTerm] = useState("");
-  // const [loading, setLoading] = useState(false);
 
-  // Modals & Alert State
+  const router = useRouter()
+
+  // Modals
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     berichtId: number | null;
-  }>({
-    isOpen: false,
-    berichtId: null,
-  });
-  const [navModal, setNavModal] = useState<{
-    isOpen: boolean;
-    berichtId: number | null;
-    type: "edit" | "view";
-  }>({
-    isOpen: false,
-    berichtId: null,
-    type: "view",
-  });
-  const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  }>({ isOpen: false, berichtId: null });
+
+  // Optional: Spinner-Status pro Aktion (nur UI, keine Backend Änderung)
+  const [pendingAction, setPendingAction] = useState<{
+    id: number;
+    type: "edit" | "view" | "delete";
+  } | null>(null);
+
+  const isActionPending = (id: number, type: "edit" | "view" | "delete") =>
+    pendingAction?.id === id && pendingAction.type === type;
+
+  const isBusy = (id: number) => pendingAction?.id === id;
 
   // Archivierungsfrist prüfen (30 Jahre)
   const isOlderThan30Years = (dateString: string) => {
     const accidentDate = new Date(dateString);
     const today = new Date();
     const cutoffDate = new Date(
-      today.getFullYear() - 30,
+      today.getFullYear() - 10,
       today.getMonth(),
       today.getDate()
     );
     return accidentDate < cutoffDate;
   };
 
-  // Filtern
-  const filteredBerichte = berichte.filter(
-    (b) =>
-      b.lfd_nr.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      b.patient_id.toString().includes(searchTerm)
-  );
+  const filteredBerichte = useMemo(() => {
+    const q = searchTerm.toLowerCase().trim();
+    if (!q) return berichte;
 
-  // Löschen Handler
-  const handleDeleteRequest = (bericht: Bericht) => {
-    if (bericht.status === "abgeschlossen") {
-      if (isOlderThan30Years(bericht.unfalltag)) {
-        setDeleteModal({ isOpen: true, berichtId: bericht.id });
-      } else {
-        setAlertMsg(
-          "Löschen nicht möglich: Archivierungsfrist von 30 Jahren noch nicht abgelaufen."
-        );
-        setTimeout(() => setAlertMsg(null), 4000);
-      }
-    } else {
-      // Entwürfe können immer gelöscht werden
-      setDeleteModal({ isOpen: true, berichtId: bericht.id });
-    }
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteModal.berichtId) return;
-
-    try {
-      // API Call zum Löschen
-      const response = await fetch(`/api/berichte/${deleteModal.berichtId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        setBerichte((prev) =>
-          prev.filter((b) => b.id !== deleteModal.berichtId)
-        );
-        setDeleteModal({ isOpen: false, berichtId: null });
-      } else {
-        const error = await response.json();
-        setAlertMsg(error.detail || "Fehler beim Löschen");
-        setTimeout(() => setAlertMsg(null), 4000);
-      }
-    } catch (error) {
-      setAlertMsg("Fehler beim Löschen des Berichts");
-      setTimeout(() => setAlertMsg(null), 4000);
-    }
-  };
-
-  const handleNavigationRequest = (berichtId: number, type: "edit" | "view") => {
-    setNavModal({ isOpen: true, berichtId, type });
-  };
-
-  // Status Badge
-  const StatusBadge = ({ status }: { status: BerichtStatus }) => {
-    const styles = {
-      entwurf: "bg-orange-50 text-orange-700 border-orange-200",
-      abgeschlossen: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    };
-
-    return (
-      <span
-        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] border ${styles[status]}`}
-      >
-        {status === "entwurf" ? "Entwurf" : "Abgeschlossen"}
-      </span>
+    return berichte.filter(
+      (b) =>
+        (b.lfd_nr ?? "").toLowerCase().includes(q) ||
+        b.patient_id.toString().includes(q)
     );
-  };
+  }, [berichte, searchTerm]);
 
-  // Action Buttons
-  const actionBtn =
-    "h-6 w-6 inline-flex items-center justify-center rounded border bg-white hover:bg-slate-50 transition";
-  const actionBtnDanger =
-    "h-6 w-6 inline-flex items-center justify-center rounded border border-red-200 bg-white text-red-600 hover:bg-red-50 transition";
+
+  function getStatusBadge(status: BerichtStatus) {
+    switch (status) {
+      case "entwurf":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-amber-500/15 text-amber-700 hover:bg-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20 border-0 p-2"
+          >
+            Entwurf
+          </Badge>
+        );
+      case "abgeschlossen":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-green-500/15 text-green-700 hover:bg-green-500/25 dark:bg-green-500/10 dark:text-green-400 dark:hover:bg-green-500/20 border-0 p-2"
+          >
+            Abgeschlossen
+          </Badge>
+        );
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  }
+
+  const deleteBericht = async (bericht: Bericht) => {
+    // prüfen den Status 
+    const berichtId = bericht.id;
+    const status = bericht.status
+    setPendingAction({ id: berichtId, type: "delete" });
+    try {
+
+      if (status === "abgeschlossen") {
+        if (isOlderThan30Years(bericht.unfalltag)) {
+          await berichteApi.delete(berichtId)
+          router.refresh()
+          toastManager.add({
+            type: "success",
+            title: "Gelöscht",
+            description: "Der Bericht wurde erfolgreich gelöscht."
+          })
+
+        } else {
+          toastManager.add({
+            type: "warning",
+            title: "Löschen nicht möglich",
+            description:
+              "Archivierungsfrist von 10 Jahren ist noch nicht abgelaufen.",
+          });
+
+          return;
+        }
+      } else {
+        await berichteApi.delete(berichtId)
+        toastManager.add({
+          type: "success",
+          title: "Gelöscht",
+          description: "Der Bericht wurde erfolgreich gelöscht."
+        })
+        router.refresh()
+      }
+    } catch {
+      toastManager.add({
+        type: "error",
+        title: "Fehler beim Löschen",
+        description: "Netzwerkfehler oder Server nicht erreichbar.",
+      });
+    } finally {
+      setPendingAction(null);
+    }
+
+  }
+
+  const downloadBericht = async ({ id, type }: { id: number; type: BerichtType }) => {
+    try {
+      if (type === "kk") {
+        await pdfApi.downloadAndSave(id, type);
+        toastManager.add({
+          type: "success",
+          title: "Success",
+          description: "Bericht für die Krankenkasse erfolgreich heruntergeladen !"
+        })
+      } else {
+        await pdfApi.downloadAndSave(id, type);
+        toastManager.add({
+          type: "success",
+          title: "Success",
+          description: "Bericht für die UV-Träger erfolgreich heruntergeladen !"
+        })
+      }
+    } catch {
+      toastManager.add({
+        type: "error",
+        title: "Fehler",
+        description: "Netzwerkfehler oder Server nicht erreichbar."
+      })
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header mit Logout */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div className="text-center flex-1">
           <p className="text-2xl text-muted-foreground">Willkommen zurück,</p>
-          <p className="text-2xl font-medium text-slate-900">
+          <p className="text-2xl font-semibold">
             {user.titel ? `${user.titel} ` : ""}
             {user.vorname} {user.nachname}
           </p>
@@ -150,12 +224,12 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
         </div>
       </div>
 
-      {/* Statistiken */}
+      {/* Statistiken (bleibt wie bei dir, nur leicht konsistent) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white border rounded-lg p-6">
+        <div className="bg-card border rounded-lg p-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 rounded-full">
-              <FileText className="h-5 w-5 text-sky-600" />
+            <div className="p-2 bg-neutral-50 rounded-full">
+              <FileText className="h-5 w-5 text-neutral-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{berichte.length}</p>
@@ -164,10 +238,10 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
           </div>
         </div>
 
-        <div className="bg-white border rounded-lg p-6">
+        <div className="bg-card border rounded-lg p-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-50  rounded-full">
-              <NotepadTextDashed className="h-5 w-5 text-orange-600" />
+            <div className="p-2 bg-orange-50 rounded-full">
+              <Archive className="h-5 w-5 text-orange-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">
@@ -178,10 +252,10 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
           </div>
         </div>
 
-        <div className="bg-white border rounded-lg p-6">
+        <div className="bg-card border rounded-lg p-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-50 rounded-full">
-              <FileCheck className="h-5 w-5 text-green-600" />
+              <FileCheck2Icon className="h-5 w-5 text-green-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">
@@ -193,15 +267,14 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
         </div>
       </div>
 
-      {/* TOOLBAR: Suche links, Button rechts */}
+      {/* Toolbar */}
       <div className="flex items-center justify-between gap-6 mb-4">
-        <div className="w-[400px]">
+        <div className="w-[420px]">
           <Input
             type="text"
             placeholder="Suchen nach Lfd.Nr. oder Patient..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-
           />
         </div>
 
@@ -213,122 +286,182 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
         </Link>
       </div>
 
-      {/* ALERT */}
-      {alertMsg && (
-        <div className="fixed top-24 right-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl shadow-lg z-50 flex items-center gap-3 animate-in slide-in-from-right">
-          <div className="bg-red-100 p-1.5 rounded-full">
-            <AlertTriangle className="w-4 h-4" />
-          </div>
-          <p className="text-sm font-medium">{alertMsg}</p>
-          <button
-            onClick={() => setAlertMsg(null)}
-            className="text-red-400 hover:text-red-600"
-            title="Schließen"
-            aria-label="Schließen"
-            type="button"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      {/* Tabelle (shadcn) */}
+      <div className="rounded-lg border bg-card overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-b">
+              <TableHead className="h-12 px-4 font-medium">Lfd.Nr.</TableHead>
+              <TableHead className="h-12 px-4 font-medium">Patienten ID</TableHead>
+              <TableHead className="h-12 px-4 font-medium w-[140px]">
+                Status
+              </TableHead>
+              <TableHead className="h-12 px-4 font-medium">Unfalldatum</TableHead>
+              <TableHead className="h-12 px-4 font-medium">Erstellt am</TableHead>
+              {user.rolle === "admin" && (
+                <TableHead className="h-12 px-4 font-medium">Arzt ID</TableHead>
+              )}
+              <TableHead className="h-12 px-4 font-medium w-[180px] text-right">
+                Aktionen
+              </TableHead>
+            </TableRow>
+          </TableHeader>
 
-      {/* TABELLE */}
-      <div className="border  rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-white border-b text-[11px] text-muted-foreground">
-                <th className="px-6 py-3 font-medium">Lfd.Nr.</th>
-                <th className="px-6 py-3 font-medium">Patient ID</th>
-                <th className="px-6 py-3 font-medium">Status</th>
-                <th className="px-6 py-3 font-medium">Unfalldatum</th>
-                <th className="px-6 py-3 font-medium">Erstellt am</th>
-                {user.rolle === "admin" && (
-                  <th className="px-6 py-3 font-medium">Arzt ID</th>
-                )}
-                <th className="px-6 py-3 font-medium text-right">Aktionen</th>
-              </tr>
-            </thead>
+          <TableBody>
+            {filteredBerichte.map((bericht) => {
+              const busy = isBusy(bericht.id);
+              const deletePending = isActionPending(bericht.id, "delete");
 
-            <tbody>
-              {filteredBerichte.map((bericht) => (
-                <tr
-                  key={bericht.id}
-                  className="border-b border-slate-100 last:border-b-0"
-                >
-                  <td className="px-6 py-4 text-sm text-foreground">
+              return (
+                <TableRow key={bericht.id} className="hover:bg-muted/50">
+                  <TableCell className="h-16 px-4 font-medium">
                     {bericht.lfd_nr}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
+                  </TableCell>
+
+                  <TableCell className="h-16 px-4 text-sm text-muted-foreground">
                     {bericht.patient_id}
-                  </td>
-                  <td className="px-6 py-4">
-                    <StatusBadge status={bericht.status} />
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
+                  </TableCell>
+
+                  <TableCell className="h-16 px-4">
+                    {getStatusBadge(bericht.status)}
+                  </TableCell>
+
+                  <TableCell className="h-16 px-4 text-sm text-muted-foreground">
                     {new Date(bericht.unfalltag).toLocaleDateString("de-DE")}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">
+                  </TableCell>
+
+                  <TableCell className="h-16 px-4 text-sm text-muted-foreground">
                     {new Date(bericht.erstellt_am).toLocaleDateString("de-DE")}
-                  </td>
+                  </TableCell>
+
                   {user.rolle === "admin" && (
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                    <TableCell className="h-16 px-4 text-sm text-muted-foreground">
                       {bericht.benutzer_id}
-                    </td>
+                    </TableCell>
                   )}
 
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      {/* Play/Edit (nur bei Entwürfen) */}
-                      {bericht.status !== "abgeschlossen" && (
-                        <button
-                          onClick={() =>
-                            handleNavigationRequest(bericht.id, "edit")
-                          }
-                          className={actionBtn}
-                          title="Bearbeiten"
-                        >
-                          <Play className="w-4 h-4 text-slate-700" />
-                        </button>
-                      )}
+                  <TableCell className="h-16 px-4 flex gap-1 items-center justify-end">
+                    <TooltipProvider delay={50}>
+                      <div className="flex items-center justify-end gap-1">
+                        {bericht.status !== "abgeschlossen" && (
+                          <Tooltip>
+                            <TooltipTrigger render={<Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() =>
+                                router.push(`/formular?id=${bericht.id}`)
+                              }
+                              disabled={busy}
+                            />}>
+                              <FilePen className="size-4" />
+                            </TooltipTrigger>
+                            <TooltipPopup>Bearbeiten</TooltipPopup>
+                          </Tooltip>
+                        )}
 
-                      {/* Delete */}
-                      <button
-                        onClick={() => handleDeleteRequest(bericht)}
-                        className={actionBtnDanger}
-                        title="Löschen"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
 
-                      {/* View */}
-                      <button
-                        onClick={() =>
-                          handleNavigationRequest(bericht.id, "view")
+                        {/* View */}
+                        {
+                          bericht.status === "abgeschlossen" &&
+                          <Tooltip>
+                            <TooltipTrigger render={<Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() =>
+                                router.push(`/api/berichte/${bericht.id}/pdf/preview`)
+                              }
+                              disabled={busy}
+                            />}>
+                              <FileTextIcon className="size-4" />
+                            </TooltipTrigger>
+                            <TooltipContent>Ansehen</TooltipContent>
+                          </Tooltip>
                         }
-                        className={actionBtn}
-                        title="Ansehen"
-                      >
-                        <FileText className="w-4 h-4 text-slate-700" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+
+                        {/* Download */}
+
+                      </div>
+                    </TooltipProvider>
+                    {
+                      bericht.status === "abgeschlossen" &&
+                      <Menu>
+                        <MenuTrigger render={<Button variant="outline" size="icon" />}>
+                          <Download className="size-4" />
+                        </MenuTrigger>
+                        <MenuPopup>
+                          <MenuItem
+                            onClick={() => {
+                              const csv = berichteToCsvAllFields([bericht]);
+                              downloadTextFile(
+                                `${bericht.lfd_nr || "bericht"}-${bericht.id}.csv`,
+                                csv,
+                                "text/csv;charset=utf-8;"
+                              );
+                            }}
+                          >
+                            Als CSV
+                          </MenuItem>
+                          <MenuSub>
+                            <MenuSubTrigger>Als PDF</MenuSubTrigger>
+                            <MenuSubPopup>
+                              <MenuItem onClick={() => downloadBericht({ id: bericht.id, type: "kk" })}>
+                                Für die Krankenkasse
+                              </MenuItem>
+                              <MenuItem onClick={() => downloadBericht({ id: bericht.id, type: "uv" })}>
+                                Für die UV-Träger
+                              </MenuItem>
+                            </MenuSubPopup>
+                          </MenuSub>
+                        </MenuPopup>
+                      </Menu>
+                    }
+
+                    {/* Delete */}
+
+                    <AlertDialog>
+                      <AlertDialogTrigger render={<Button variant="destructive-outline" size="icon" />}>
+                        {deletePending ? (
+                          <Spinner />
+                        ) : (
+                          <Trash2Icon />
+                        )}
+                      </AlertDialogTrigger>
+                      <AlertDialogPopup>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Bericht löschen</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Möchten Sie diesen Bericht wirklich unwiderruflich löschen? Diese Aktion ist unwiderruflich, gehen Sie damit vorsicht vor.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogClose render={<Button variant="ghost" />}>
+                            Abbrechen
+                          </AlertDialogClose>
+                          <AlertDialogClose render={<Button variant="destructive" onClick={() => deleteBericht(bericht)} />}>
+                            Ja, löschen
+                          </AlertDialogClose>
+                        </AlertDialogFooter>
+                      </AlertDialogPopup>
+                    </AlertDialog>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
 
         {/* Empty State */}
         {filteredBerichte.length === 0 && (
           <div className="p-16 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full  mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4">
               <Search className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-slate-900 font-medium text-lg mb-1">
+            <h3 className="text-muted-foreground font-medium text-lg mb-1">
               Keine Berichte gefunden
             </h3>
-            <p className="text-muted-foreground">
+            <p className="text-foreground">
               {searchTerm
                 ? "Versuchen Sie einen anderen Suchbegriff."
                 : "Erstellen Sie Ihren ersten Bericht."}
@@ -341,100 +474,26 @@ export default function DashboardClient({ user, initialBerichte }: DashboardClie
 
       {/* Löschen Modal */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 bg-neutral-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="bg-red-100 p-3 rounded-full text-red-600">
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  Bericht löschen?
-                </h3>
-                <p className="text-muted-foreground text-sm mt-1 leading-relaxed">
+        <>
+          <AlertDialog>
+            <AlertDialogPopup>
+              <AlertDialogHeader>
+                <AlertDialogTitle> Bericht löschen?</AlertDialogTitle>
+                <AlertDialogDescription>
                   Möchten Sie diesen Bericht wirklich unwiderruflich löschen?
-                  <br />
-                  Diese Aktion kann nicht rückgängig gemacht werden.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() =>
-                  setDeleteModal({ isOpen: false, berichtId: null })
-                }
-                className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition"
-              >
-                Abbrechen
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition shadow-sm"
-              >
-                Ja, löschen
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Navigation Modal */}
-      {navModal.isOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 relative">
-            <button
-              onClick={() => setNavModal({ ...navModal, isOpen: false })}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-full transition"
-              aria-label="Modales Fenster schließen"
-              title="Schließen"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="text-center mb-6 pt-2">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-slate-100 text-slate-800 mb-4">
-                {navModal.type === "edit" ? (
-                  <Play className="w-7 h-7 ml-1" />
-                ) : (
-                  <FileText className="w-7 h-7" />
-                )}
-              </div>
-
-              <h3 className="text-xl font-bold text-slate-900">
-                {navModal.type === "edit"
-                  ? "Bericht weiterbearbeiten?"
-                  : "Bericht anzeigen"}
-              </h3>
-
-              <p className="text-slate-600 text-sm mt-2 px-4">
-                {navModal.type === "edit"
-                  ? "Möchten Sie die Bearbeitung dieses Berichts fortsetzen?"
-                  : "Sie öffnen den Bericht im Lesemodus. Änderungen sind hier nicht möglich."}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setNavModal({ ...navModal, isOpen: false })}
-                className="px-4 py-2.5 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition"
-              >
-                Abbrechen
-              </button>
-
-              <Link
-                href={
-                  navModal.type === "view"
-                    ? `/berichte/${navModal.berichtId}`
-                    : `/berichte/${navModal.berichtId}/edit`
-                }
-                className="px-4 py-2.5 bg-black text-white rounded-lg font-medium hover:bg-slate-900 transition shadow-sm flex items-center justify-center gap-2"
-              >
-                {navModal.type === "edit" ? "Fortsetzen" : "Anzeigen"}
-              </Link>
-            </div>
-          </div>
-        </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogClose render={<Button variant="ghost" />}>
+                  Abbrechen
+                </AlertDialogClose>
+                <AlertDialogClose render={<Button variant="destructive" onClick={() => setDeleteModal({ isOpen: false, berichtId: null })} />}>
+                  Ja, löschen
+                </AlertDialogClose>
+              </AlertDialogFooter>
+            </AlertDialogPopup>
+          </AlertDialog>
+        </>
       )}
     </div>
   );
