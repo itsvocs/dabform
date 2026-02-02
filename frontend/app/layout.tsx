@@ -5,6 +5,7 @@ import Header from "@/components/app/header";
 import Footer from "@/components/app/footer";
 import { AuthProvider } from "@/contexts/auth-context";
 import { AnchoredToastProvider, ToastProvider } from "@/components/ui/toast"
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -22,19 +23,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="de" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased flex flex-col min-h-screen`}>
-        <AuthProvider>
-          <ToastProvider position="top-right">
-            <AnchoredToastProvider>
-              <Header />
-              <main className="grow">
-                {children}
-              </main>
-              <Footer />
-            </AnchoredToastProvider>
-          </ToastProvider>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <ToastProvider position="top-right">
+              <AnchoredToastProvider>
+                <Header />
+                <main className="grow">
+                  {children}
+                </main>
+                <Footer />
+              </AnchoredToastProvider>
+            </ToastProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

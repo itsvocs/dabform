@@ -115,8 +115,8 @@ export function Step5Form({ systemMeta }: Step5FormProps) {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Arbeitsfähig:</span>
                 <span>
-                  {bericht?.arbeitsfaehig === true && <Badge variant="outline" className="bg-green-50">Ja</Badge>}
-                  {bericht?.arbeitsfaehig === false && <Badge variant="outline" className="bg-red-50">Nein</Badge>}
+                  {bericht?.arbeitsfaehig === true && <Badge variant="outline" className="bg-green-50 dark:bg-green-950">Ja</Badge>}
+                  {bericht?.arbeitsfaehig === false && <Badge variant="outline" className="bg-red-50 dark:bg-red-950">Nein</Badge>}
                   {bericht?.arbeitsfaehig === null && "-"}
                 </span>
               </div>
@@ -155,7 +155,7 @@ export function Step5Form({ systemMeta }: Step5FormProps) {
             bericht?.ergaenzung_knieverletzung ||
             bericht?.ergaenzung_schulterverletzung ||
             bericht?.ergaenzung_verbrennung) && (
-              <Card className="border-amber-200 bg-amber-50/50">
+              <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/5 dark:border-amber-950">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2 text-amber-800">
                     <AlertCircle className="h-4 w-4" />
@@ -268,7 +268,7 @@ export function Step5Form({ systemMeta }: Step5FormProps) {
         <div className="md:col-span-2">
           <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
             <div className="col-span-full">
-              <Card className="bg-slate-50">
+              <Card className="bg-neutral-50 dark:bg-accent">
                 <CardContent className="pt-6">
                   <p className="text-sm text-muted-foreground mb-4">
                     Gemäß § 201 SGB VII werden die Sozialdaten des Versicherten
@@ -325,14 +325,14 @@ export function Step5Form({ systemMeta }: Step5FormProps) {
         </div>
 
         <div className="md:col-span-2">
-          <Card className="bg-green-50 border-green-200">
+          <Card className="bg-green-50 border-green-200 dark:bg-gray-600/10 dark:border-gray-950">
             <CardContent className="pt-6">
               <div className="flex items-start gap-3">
-                <div className="rounded-full bg-green-100 p-2">
+                <div className="rounded-full bg-green-100 dark:bg-gray-950 p-2">
                   <FileText className="h-5 w-5 text-green-700" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-green-900">
+                  <h3 className="font-medium text-green-400">
                     Bericht abschließen
                   </h3>
                   <p className="text-sm text-green-700 mt-1">

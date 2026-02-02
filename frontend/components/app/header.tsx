@@ -14,9 +14,13 @@ import {
 } from "@/components/ui/menu";
 import { logoutAction } from '@/app/actions/auth';
 import { useAuth } from '@/contexts/auth-context';
-import { ChevronDown, LogOut } from 'lucide-react';
+import { ChevronDown, LogOut, Moon, Sun } from 'lucide-react';
+import { DropdownMenu } from '@radix-ui/react-dropdown-menu';
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { useTheme } from 'next-themes';
 
 export default function Header() {
+    const { setTheme } = useTheme()
     const router = useRouter();
     const pathname = usePathname();
     const { user, loading, logout } = useAuth();
@@ -30,9 +34,9 @@ export default function Header() {
         <header className="border-b bg-background">
             <nav className="mx-auto flex max-w-[1300px] items-center justify-between p-6 lg:px-8">
                 <div className="flex">
-                    <Link href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
+                    <Link href={user ? "/dashboard" : "/"} className="-m-1.5 p-1.5 flex items-center space-x-2">
                         <Logo className="h-8 w-auto" />
-                        <span className="text-2xl font-medium text-foreground/70">Dabform</span>
+                        <span className="text-2xl font-medium text-foreground/70 dark:text-foreground">Dabform</span>
                     </Link>
                 </div>
 
@@ -74,6 +78,27 @@ export default function Header() {
                             </Button>
                         </Link>
                     )}
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon">
+                                <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                                <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                                <span className="sr-only">Toggle theme</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setTheme("light")}>
+                                Light
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTheme("dark")}>
+                                Dark
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setTheme("system")}>
+                                System
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </nav>
         </header>

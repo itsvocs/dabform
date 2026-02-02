@@ -9,7 +9,7 @@ from alembic import context
 import sys
 from pathlib import Path
 
-# Füge app/ zum Python Path hinzu
+# 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from app.core.database import Base, engine

@@ -15,6 +15,14 @@ import {
 
 import type { User, Bericht } from "@/types";
 
+import {
+  Select,
+  SelectItem,
+  SelectPopup,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,6 +66,22 @@ interface DashboardClientProps {
 type BerichtStatus = "entwurf" | "abgeschlossen";
 type BerichtType = "kk" | "uv"
 
+
+const statusItems = [
+  { label: "Alle", value: "all" },
+  { label: "Entwurf", value: "entwurf" },
+  { label: "Abgeschlossen", value: "abgeschlossen" },
+];
+
+const sortByItems = [
+  { label: "Erstellt am", value: "erstellt_am" },
+  { label: "Unfalldatum", value: "unfalltag" },
+];
+
+const sortDirItems = [
+  { label: "Neu", value: "desc" },
+  { label: "Alt", value: "asc" },
+];
 export default function DashboardClient({
   user,
   initialBerichte,
@@ -65,6 +89,9 @@ export default function DashboardClient({
 
   const [berichte, setBerichte] = useState<Bericht[]>(initialBerichte);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | BerichtStatus>("all");
+  const [sortBy, setSortBy] = useState<"unfalltag" | "erstellt_am">("erstellt_am");
+  const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
 
   const router = useRouter()
 
@@ -99,14 +126,37 @@ export default function DashboardClient({
 
   const filteredBerichte = useMemo(() => {
     const q = searchTerm.toLowerCase().trim();
-    if (!q) return berichte;
 
-    return berichte.filter(
-      (b) =>
-        (b.lfd_nr ?? "").toLowerCase().includes(q) ||
-        b.patient_id.toString().includes(q)
-    );
-  }, [berichte, searchTerm]);
+    let list = berichte;
+
+    // Search
+    if (q) {
+      list = list.filter(
+        (b) =>
+          (b.lfd_nr ?? "").toLowerCase().includes(q) ||
+          b.patient_id.toString().includes(q)
+      );
+    }
+
+    // Status Filter
+    if (statusFilter !== "all") {
+      list = list.filter((b) => b.status === statusFilter);
+    }
+
+    // Sort
+    const getTime = (b: Bericht) => {
+      const v = (b)[sortBy];
+      return v ? new Date(v).getTime() : 0;
+    };
+
+    list = [...list].sort((a, b) => {
+      const diff = getTime(a) - getTime(b);
+      return sortDir === "asc" ? diff : -diff;
+    });
+
+    return list;
+  }, [berichte, searchTerm, statusFilter, sortBy, sortDir]);
+
 
 
   function getStatusBadge(status: BerichtStatus) {
@@ -228,8 +278,8 @@ export default function DashboardClient({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-card border rounded-lg p-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-neutral-50 rounded-full">
-              <FileText className="h-5 w-5 text-neutral-600" />
+            <div className="p-2 bg-neutral-50 dark:bg-neutral-900 rounded-full">
+              <FileText className="h-5 w-5 text-neutral-600 dark:text-foreground" />
             </div>
             <div>
               <p className="text-2xl font-bold">{berichte.length}</p>
@@ -240,8 +290,8 @@ export default function DashboardClient({
 
         <div className="bg-card border rounded-lg p-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-50 rounded-full">
-              <Archive className="h-5 w-5 text-orange-600" />
+            <div className="p-2 bg-orange-50 dark:bg-orange-900/30 rounded-full">
+              <Archive className="h-5 w-5 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
               <p className="text-2xl font-bold">
@@ -254,8 +304,8 @@ export default function DashboardClient({
 
         <div className="bg-card border rounded-lg p-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-50 rounded-full">
-              <FileCheck2Icon className="h-5 w-5 text-green-600" />
+            <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded-full">
+              <FileCheck2Icon className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
               <p className="text-2xl font-bold">
@@ -268,22 +318,87 @@ export default function DashboardClient({
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-6 mb-4">
-        <div className="w-[420px]">
-          <Input
-            type="text"
-            placeholder="Suchen nach Lfd.Nr. oder Patient..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      <div className="flex sm:flex-row flex-col items-center justify-between gap-6 mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-[420px]">
+            <Input
+              type="text"
+              size="lg"
+              placeholder="Suchen nach Lfd.Nr. oder Patient..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
+
 
         <Link
           href="/formular"
-          className="h-9 px-5 rounded-lg bg-black text-white text-sm font-medium hover:bg-slate-900 transition flex items-center"
+          className="h-9 px-5 rounded-lg bg-black dark:bg-foreground text-white dark:text-black text-sm font-medium hover:opacity-70 transition flex items-center"
         >
           + Neuer Bericht
         </Link>
+      </div>
+
+      <div className="flex items-center gap-2 py-4 flex-wrap">
+        {/* Status */}
+        <Select
+          aria-label="Status Filter"
+          items={statusItems}
+          value={statusFilter ?? "all"}
+          onValueChange={(v) => setStatusFilter(v as "entwurf" | "abgeschlossen" | "all")}
+        >
+          <SelectTrigger className="h-10 w-[170px]">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectPopup>
+            {statusItems.map(({ label, value }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectPopup>
+        </Select>
+
+        {/* Sort Field */}
+        <Select
+          aria-label="Sortieren nach"
+          items={sortByItems}
+          value={sortBy}
+          onValueChange={(v) =>
+            setSortBy(v as typeof sortBy)
+          }
+        >
+          <SelectTrigger className="h-10 w-[170px]">
+            <SelectValue placeholder="Sortieren nach" />
+          </SelectTrigger>
+          <SelectPopup>
+            {sortByItems.map(({ label, value }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectPopup>
+        </Select>
+
+        {/* Sort Direction */}
+        <Select
+          aria-label="Sortier-Richtung"
+          items={sortDirItems}
+          value={sortDir}
+          onValueChange={(v) => setSortDir(v as "asc" | "desc")}
+        >
+          <SelectTrigger className="h-10 w-[150px]">
+            <SelectValue placeholder="Richtung" />
+          </SelectTrigger>
+          <SelectPopup>
+            {sortDirItems.map(({ label, value }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectPopup>
+        </Select>
       </div>
 
       {/* Tabelle (shadcn) */}

@@ -13,6 +13,7 @@ import { CircleAlertIcon, CheckCircle2, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { toastManager } from "@/components/ui/toast";
 
 type Errors = Record<string, string | string[]>;
 
@@ -26,14 +27,12 @@ const EditForm = ({ user }: Props) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [generalError, setGeneralError] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     setErrors({});
     setGeneralError("");
-    setSuccess(false);
 
     const formData = new FormData(event.currentTarget);
 
@@ -62,7 +61,11 @@ const EditForm = ({ user }: Props) => {
         throw new Error(error.detail || 'Update fehlgeschlagen');
       }
 
-      setSuccess(true);
+      toastManager.add({
+        type: "success",
+        description: "Profil erfolgreich aktualisiert."
+      })
+
       await refreshUser(); // Context aktualisieren
 
       setTimeout(() => {
@@ -94,16 +97,6 @@ const EditForm = ({ user }: Props) => {
               <CircleAlertIcon />
               <AlertTitle>Fehler</AlertTitle>
               <AlertDescription>{generalError}</AlertDescription>
-            </Alert>
-          )}
-
-          {success && (
-            <Alert className="mb-4 border-green-200 bg-green-50">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertTitle className="text-green-800">Erfolg</AlertTitle>
-              <AlertDescription className="text-green-700">
-                Profil erfolgreich aktualisiert. Sie werden weitergeleitet...
-              </AlertDescription>
             </Alert>
           )}
         </div>

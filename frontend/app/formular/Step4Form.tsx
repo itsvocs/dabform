@@ -18,6 +18,176 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+
+const ICD10_SUGGESTIONS = [
+  // Kopf / Gehirn / Gesicht
+  { code: "S00.0", label: "Oberflächliche Verletzung der Kopfhaut" },
+  { code: "S00.1", label: "Prellung der Augenregion" },
+  { code: "S01.0", label: "Offene Wunde der Kopfhaut" },
+  { code: "S02.0", label: "Fraktur der Schädelkalotte" },
+  { code: "S02.2", label: "Fraktur der Nasenbeine" },
+  { code: "S02.4", label: "Fraktur des Jochbeins/Maxilla" },
+  { code: "S02.5", label: "Zahnfraktur" },
+  { code: "S05.0", label: "Verletzung von Konjunktiva/Hornhaut" },
+  { code: "S06.0", label: "Gehirnerschütterung" },
+  { code: "S06.2", label: "Diffuse Hirnverletzung" },
+  { code: "S06.5", label: "Traumatische Subduralblutung" },
+  { code: "S06.6", label: "Traumatische Subarachnoidalblutung" },
+  { code: "S09.9", label: "Nicht näher bezeichnete Verletzung des Kopfes" },
+
+  // Hals / Thorax
+  { code: "S10.9", label: "Oberflächliche Verletzung des Halses, n.n.b." },
+  { code: "S11.9", label: "Offene Wunde des Halses, n.n.b." },
+  { code: "S20.2", label: "Prellung des Thorax" },
+  { code: "S22.3", label: "Fraktur einer Rippe" },
+  { code: "S22.4", label: "Mehrfachfrakturen der Rippen" },
+  { code: "S23.3", label: "Verstauchung/Zerrung der Brustwirbelsäule" },
+  { code: "S27.0", label: "Traumatischer Pneumothorax" },
+
+  // Abdomen / Becken
+  { code: "S30.0", label: "Prellung der Lendenregion und des Beckens" },
+  { code: "S31.0", label: "Offene Wunde der Lendenregion" },
+  { code: "S32.0", label: "Fraktur eines Lendenwirbels" },
+  { code: "S32.1", label: "Fraktur des Kreuzbeins" },
+  { code: "S32.2", label: "Fraktur des Steißbeins" },
+  { code: "S32.3", label: "Fraktur des Darmbeins" },
+  { code: "S32.4", label: "Fraktur der Pfanne (Acetabulum)" },
+  { code: "S32.5", label: "Fraktur des Schambeins" },
+  { code: "S36.0", label: "Verletzung der Milz" },
+  { code: "S36.1", label: "Verletzung der Leber oder Gallenblase" },
+
+  // Schulter / Oberarm / Ellenbogen
+  { code: "S40.0", label: "Prellung der Schulter und des Oberarms" },
+  { code: "S42.0", label: "Fraktur der Klavikula" },
+  { code: "S42.2", label: "Fraktur des proximalen Humerus" },
+  { code: "S43.0", label: "Luxation des Schultergelenks" },
+  { code: "S46.0", label: "Verletzung der Rotatorenmanschette" },
+  { code: "S50.0", label: "Prellung des Ellenbogens" },
+  { code: "S52.0", label: "Fraktur des proximalen Ulna (Olecranon)" },
+  { code: "S52.1", label: "Fraktur des proximalen Radius" },
+  { code: "S53.4", label: "Distorsion/Zerrung des Ellenbogens" },
+
+  // Unterarm / Handgelenk / Hand / Finger
+  { code: "S52.5", label: "Fraktur des distalen Radius" },
+  { code: "S52.6", label: "Fraktur von distalem Radius und Ulna" },
+  { code: "S60.0", label: "Prellung der Finger" },
+  { code: "S60.2", label: "Prellung des Handgelenks und der Hand" },
+  { code: "S61.0", label: "Offene Wunde eines Fingers" },
+  { code: "S61.5", label: "Offene Wunde der Hand" },
+  { code: "S62.0", label: "Fraktur des Kahnbeins (Scaphoid)" },
+  { code: "S62.1", label: "Fraktur eines anderen Handwurzelknochens" },
+  { code: "S62.3", label: "Fraktur eines Mittelhandknochens" },
+  { code: "S62.5", label: "Fraktur des Daumens" },
+  { code: "S62.6", label: "Fraktur eines anderen Fingers" },
+  { code: "S63.0", label: "Luxation des Handgelenks" },
+  { code: "S63.2", label: "Luxation eines Fingers" },
+  { code: "S63.5", label: "Distorsion des Handgelenks" },
+  { code: "S64.0", label: "Verletzung des N. ulnaris auf Handgelenk-/Handhöhe" },
+  { code: "S64.1", label: "Verletzung des N. medianus auf Handgelenk-/Handhöhe" },
+  { code: "S66.0", label: "Verletzung der Beugesehnen am Handgelenk/Hand" },
+  { code: "S66.1", label: "Verletzung der Strecksehnen am Handgelenk/Hand" },
+  { code: "S67.0", label: "Quetschung des Daumens und anderer Finger" },
+  { code: "S67.8", label: "Quetschung anderer Teile des Handgelenks/der Hand" },
+  { code: "T14.0", label: "Oberflächliche Verletzung an nicht näher bezeichneter Lokalisation" },
+  { code: "T14.1", label: "Offene Wunde an nicht näher bezeichneter Lokalisation" },
+
+  // Wirbelsäule / Rücken
+  { code: "S13.4", label: "Distorsion der Halswirbelsäule (HWS-Distorsion)" },
+  { code: "S23.0", label: "Distorsion der Brustwirbelsäule" },
+  { code: "S33.5", label: "Distorsion der Lendenwirbelsäule" },
+  { code: "M54.2", label: "Zervikalgie (Nackenschmerz)" },
+  { code: "M54.5", label: "Kreuzschmerz" },
+
+  // Hüfte / Oberschenkel / Knie
+  { code: "S70.0", label: "Prellung der Hüfte" },
+  { code: "S72.0", label: "Fraktur des Schenkelhalses" },
+  { code: "S72.1", label: "Pertrochantäre Fraktur" },
+  { code: "S72.3", label: "Fraktur des Femurschaftes" },
+  { code: "S73.0", label: "Luxation des Hüftgelenks" },
+  { code: "S80.0", label: "Prellung des Knies" },
+  { code: "S81.0", label: "Offene Wunde des Knies" },
+  { code: "S82.0", label: "Fraktur der Patella" },
+  { code: "S82.1", label: "Fraktur der proximalen Tibia" },
+  { code: "S82.2", label: "Fraktur des Tibiaschaftes" },
+  { code: "S83.0", label: "Luxation der Patella" },
+  { code: "S83.2", label: "Meniskusriss (akut/traumatisch)" },
+  { code: "S83.5", label: "Ruptur des vorderen Kreuzbandes" },
+  { code: "S83.6", label: "Ruptur des hinteren Kreuzbandes" },
+  { code: "S83.4", label: "Distorsion/Zerrung des Kniegelenks" },
+
+  // Unterschenkel / Sprunggelenk / Fuß
+  { code: "S90.0", label: "Prellung des Sprunggelenks" },
+  { code: "S90.3", label: "Prellung des Fußes" },
+  { code: "S91.0", label: "Offene Wunde des Sprunggelenks" },
+  { code: "S91.3", label: "Offene Wunde des Fußes" },
+  { code: "S92.0", label: "Fraktur des Kalkaneus" },
+  { code: "S92.1", label: "Fraktur des Talus" },
+  { code: "S92.3", label: "Fraktur eines Mittelfußknochens" },
+  { code: "S93.4", label: "Distorsion des Sprunggelenks" },
+  { code: "S93.6", label: "Distorsion des Fußes" },
+
+  // Verbrennungen / Verätzungen
+  { code: "T20.0", label: "Verbrennung Kopf/Hals, Grad n.n.b." },
+  { code: "T21.0", label: "Verbrennung Rumpf, Grad n.n.b." },
+  { code: "T22.0", label: "Verbrennung Schulter/Oberarm, Grad n.n.b." },
+  { code: "T23.0", label: "Verbrennung Handgelenk/Hand, Grad n.n.b." },
+  { code: "T24.0", label: "Verbrennung Hüfte/Bein, Grad n.n.b." },
+  { code: "T25.0", label: "Verbrennung Sprunggelenk/Fuß, Grad n.n.b." },
+  { code: "T26.0", label: "Verbrennung des Auges/Adnexe, Grad n.n.b." },
+  { code: "T30.0", label: "Verbrennung, Körperregion n.n.b." },
+  { code: "T31.0", label: "Verbrennungen: <10% KOF" },
+
+  // Vergiftungen / Medikamente / Exposition
+  { code: "T36.0", label: "Vergiftung durch Penicilline" },
+  { code: "T39.0", label: "Vergiftung durch Salicylate" },
+  { code: "T40.2", label: "Vergiftung durch andere Opioide" },
+  { code: "T42.4", label: "Vergiftung durch Benzodiazepine" },
+  { code: "T50.9", label: "Vergiftung durch Arzneimittel, n.n.b." },
+
+  // Fremdkörper / Biss / Stich
+  { code: "T14.3", label: "Kontusion/Prellung, n.n.b." },
+  { code: "T14.8", label: "Sonstige Verletzung, n.n.b." },
+  { code: "W54", label: "Biss oder Angriff durch Hund" },
+  { code: "W55", label: "Biss oder Angriff durch anderes Säugetier" },
+  { code: "W57", label: "Biss oder Stich durch nichtgiftiges Insekt" },
+
+  // Stürze / Unfälle (äußere Ursachen – optional, aber oft dokumentiert)
+  { code: "W01", label: "Sturz auf gleicher Ebene durch Ausrutschen/Stolpern" },
+  { code: "W10", label: "Sturz auf/aus Treppe oder Stufen" },
+  { code: "W19", label: "Sturz, nicht näher bezeichnet" },
+  { code: "V89.2", label: "Verkehrsunfall, Fahrzeugart n.n.b." },
+
+  // Häufige Symptome / Beschwerden (Praxisalltag)
+  { code: "R07.4", label: "Brustschmerz, n.n.b." },
+  { code: "R10.4", label: "Sonstige/unspezifische Bauchschmerzen" },
+  { code: "R11", label: "Übelkeit und Erbrechen" },
+  { code: "R42", label: "Schwindel" },
+  { code: "R51", label: "Kopfschmerz" },
+  { code: "R52.0", label: "Akuter Schmerz" },
+  { code: "R53", label: "Unwohlsein und Ermüdung" },
+  { code: "R55", label: "Synkope und Kollaps" },
+
+  // Muskel/Skelett – häufige Diagnosen
+  { code: "M25.5", label: "Gelenkschmerz" },
+  { code: "M70.6", label: "Trochanterbursitis" },
+  { code: "M75.1", label: "Rotatorenmanschettenläsion" },
+  { code: "M76.5", label: "Patellaspitzensyndrom" },
+  { code: "M77.1", label: "Epicondylitis lateralis (Tennisellenbogen)" },
+
+  // Wunden / Infektionen (häufig bei Verletzungen)
+  { code: "L03.1", label: "Phlegmone der oberen Extremität" },
+  { code: "L03.3", label: "Phlegmone der unteren Extremität" },
+  { code: "L08.9", label: "Lokale Hautinfektion, n.n.b." },
+
+  // Sonstiges – häufiges in Notfall/D-Arzt Umfeld
+  { code: "T79.6", label: "Traumatisches Kompartmentsyndrom" },
+  { code: "T81.0", label: "Blutung/Hämatom als Komplikation eines Eingriffs" },
+  { code: "Z23", label: "Immunisierung (Impfbedarf)" },
+  { code: "Z48.0", label: "Verbandswechsel/Nahtkontrolle" },
+  { code: "Z09", label: "Nachuntersuchung nach Behandlung" },
+];
+
 
 export function Step4Form() {
   const {
@@ -37,6 +207,8 @@ export function Step4Form() {
   const weiterbehandlungDurch = useWatch({ control, name: "bericht.weiterbehandlung_durch" });
   const arbeitsfaehig = useWatch({ control, name: "bericht.arbeitsfaehig" });
   const weitereAerzteNoetig = useWatch({ control, name: "bericht.weitere_aerzte_noetig" });
+  const icd10Value = useWatch({ control, name: "bericht.erstdiagnose_icd10" }) ?? "";
+  const [openICD, setOpenICD] = useState(false)
 
   // Schwere Verletzung = ICD/AO erforderlich
   const isSevereInjury = handverletzung || polytrauma;
@@ -204,18 +376,76 @@ export function Step4Form() {
 
         <div className="md:col-span-2">
           <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+            {/* ICD-10 Code mit Autocomplete */}
             <div className="col-span-full sm:col-span-3">
               <Label htmlFor="erstdiagnose_icd10">
                 ICD-10 Code {isSevereInjury && <span className="text-destructive">*</span>}
               </Label>
-              <Input
-                id="erstdiagnose_icd10"
-                placeholder="z.B. S62.5"
-                className="mt-2"
-                {...register("bericht.erstdiagnose_icd10")}
-              />
+
+              <div className="relative mt-2">
+                <Input
+                  id="erstdiagnose_icd10"
+                  placeholder="z.B. S62.5"
+                  autoComplete="off"
+                  {...register("bericht.erstdiagnose_icd10")}
+                  onFocus={() => setOpenICD(true)}
+                  onBlur={() => setTimeout(() => setOpenICD(false), 120)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") setOpenICD(false);
+                  }}
+                />
+
+                {/* Vorschläge */}
+                {icd10Value.trim().length > 0 && openICD && (
+                  <div className="absolute z-50 mt-2 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
+                    {ICD10_SUGGESTIONS
+                      .filter((x) => {
+                        const q = icd10Value.trim().toLowerCase();
+                        return (
+                          x.code.toLowerCase().includes(q) ||
+                          x.label.toLowerCase().includes(q)
+                        );
+                      })
+                      .slice(0, 8)
+                      .map((x) => (
+                        <button
+                          key={x.code}
+                          type="button"
+                          className="flex w-full items-start gap-3 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                          onMouseDown={(e) => {
+                            e.preventDefault(); // verhindert blur bevor wir setzen
+                            setValue("bericht.erstdiagnose_icd10", x.code, {
+                              shouldValidate: true,
+                              shouldDirty: true,
+                            });
+                            setOpenICD(false);
+                          }}
+                        >
+                          <span className="font-mono font-medium">{x.code}</span>
+                          <span className="text-muted-foreground">{x.label}</span>
+                        </button>
+                      ))}
+
+                    {/* Falls nichts gefunden */}
+                    {ICD10_SUGGESTIONS.filter((x) => {
+                      const q = icd10Value.trim().toLowerCase();
+                      return (
+                        x.code.toLowerCase().includes(q) ||
+                        x.label.toLowerCase().includes(q)
+                      );
+                    }).length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                          Keine Vorschläge
+                        </div>
+                      )}
+                  </div>
+                )}
+              </div>
+
               {errors.bericht?.erstdiagnose_icd10 && (
-                <p className="text-sm text-destructive mt-1">{errors.bericht.erstdiagnose_icd10.message}</p>
+                <p className="text-sm text-destructive mt-1">
+                  {errors.bericht.erstdiagnose_icd10.message}
+                </p>
               )}
             </div>
 

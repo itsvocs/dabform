@@ -178,9 +178,9 @@ export function Step1Form({ onPatientSelect, selectedPatientId }: Step1FormProps
         <div className="md:col-span-2">
           <div className="flex flex-col gap-4">
             {/* Patient Suche Popover */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <CommandDialog open={patientPopoverOpen} onOpenChange={setPatientPopoverOpen}>
-                <CommandDialogTrigger render={<Button variant="outline" className="w-80 justify-between" />}>
+                <CommandDialogTrigger render={<Button variant="outline" className="w-full sm:w-80 justify-between" />}>
                   {selectedPatientId && watchedVorname ? (
                     <span>
                       {watchedVorname} {" "}{watchedNachname}

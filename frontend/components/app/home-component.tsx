@@ -7,7 +7,7 @@ export function HomeComponent() {
     return (
         <div className="relative py-32 w-screen  overflow-hidden">
             {/* Gradient overlay for better text readability */}
-            <div className="absolute inset-0 bg-linear-to-b from-white/40 via-transparent to-white/60 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-b from-white/40 dark:from-black/40 via-transparent to-white/60 dark:to-background/60 pointer-events-none" />
 
             {/* Hero content */}
             <div className="relative z-10 flex h-full flex-col items-center justify-center px-4">
@@ -19,13 +19,13 @@ export function HomeComponent() {
                     </h1>
 
                     {/* Description */}
-                    <p className="mx-auto mb-10 max-w-2xl text-base text-black/60 sm:text-xl">
+                    <p className="mx-auto mb-10 max-w-2xl text-base text-black/60 dark:text-white/60 sm:text-xl">
                         Eine Plattform für die einfache Erstellung und Verwaltung digitaler Durchgangsarztberichte für Durchgangsärzte, von allen Geräten und überall erreichbar.
                     </p>
 
                     {/* Buttons */}
                     <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                        <button className="group relative inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black px-8 text-base font-medium text-white transition-all hover:bg-black/90 hover:scale-105"
+                        <button className="group relative inline-flex h-12 items-center justify-center gap-2 rounded-full bg-black dark:bg-white px-8 text-base font-medium text-white dark:text-black transition-all hover:bg-black/90 hover:scale-105"
                             onClick={() => router.push("/login")}
                         >
                             Jetzt starten
@@ -43,7 +43,7 @@ export function HomeComponent() {
                                 />
                             </svg>
                         </button>
-                        <button className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/20 bg-black/5 px-8 text-base font-medium text-black backdrop-blur-sm transition-all hover:bg-black/10 hover:border-black/30"
+                        <button className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/20 bg-black/5 dark:bg-white/5 px-8 text-base font-medium text-black dark:text-white backdrop-blur-sm transition-all hover:bg-black/10 hover:border-black/30"
                             onClick={() => router.push("https://gitlab.ges.thm.de/lehre/swtp/wise2526/g1_dabform/-/wikis/home")}
                         >
                             Zur Dokumentation

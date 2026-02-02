@@ -700,9 +700,9 @@ export default function FormularPage({ berichtId }: FormularPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-100 pb-24">
+    <main className="min-h-screen bg-neutral-100 dark:bg-background pb-24">
       {/* HEADER */}
-      <div className="bg-white border-b sticky top-0 z-30">
+      <div className="bg-white dark:bg-black border-b sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-xl font-bold flex items-center gap-2">
@@ -761,7 +761,7 @@ export default function FormularPage({ berichtId }: FormularPageProps) {
       <div className="flex items-center justify-center p-6 md:p-10">
         <FormProvider {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="w-full max-w-5xl">
-            <div className="bg-white rounded-none sm:rounded-lg p-6 sm:p-10 min-h-[500px] border shadow-sm">
+            <div className="bg-background rounded-none sm:rounded-lg p-6 sm:p-10 min-h-[500px] border shadow-sm">
               {step === 1 && (
                 <Step1Form
                   onPatientSelect={(id) => setPatientId(id)}
@@ -806,7 +806,12 @@ export default function FormularPage({ berichtId }: FormularPageProps) {
               ) : (
                 <Save className="h-4 w-4 mr-2" />
               )}
-              Als Entwurf speichern
+              <span className="hidden sm:flex">
+                Als Entwurf speichern
+              </span>
+              <span className="sm:hidden flex">
+                Entwerfen
+              </span>
             </Button>
           </div>
 

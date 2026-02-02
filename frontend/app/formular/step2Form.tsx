@@ -231,9 +231,9 @@ export function Step2Form({
             {/* Krankenkasse Suche */}
             <div className="col-span-full">
               <Label>Krankenkasse suchen oder neu anlegen</Label>
-              <div className="flex gap-3 mt-2">
+              <div className="flex gap-3 mt-2 flex-wrap">
                 <Popover open={kkOpen} onOpenChange={setKkOpen}>
-                  <PopoverTrigger render={<Button variant="outline" className="w-80 justify-between" />}>
+                  <PopoverTrigger render={<Button variant="outline" className="sm:w-80 w-full justify-between" />}>
                     {selectedKrankenkasseId && kkName ? (
                       <span>{kkName}</span>
                     ) : (
@@ -458,9 +458,9 @@ export function Step2Form({
             {/* Unfallbetrieb Suche */}
             <div className="col-span-full">
               <Label>Unfallbetrieb suchen oder neu anlegen</Label>
-              <div className="flex gap-3 mt-2">
+              <div className="flex gap-3 mt-2 flex-wrap">
                 <Popover open={ubOpen} onOpenChange={setUbOpen}>
-                  <PopoverTrigger render={<Button variant="outline" className="w-80 justify-between" />}>
+                  <PopoverTrigger render={<Button variant="outline" className="sm:w-80 w-full justify-between" />}>
 
                     {selectedUnfallbetriebId && ubName ? (
                       <span>{ubName}</span>
@@ -471,7 +471,7 @@ export function Step2Form({
                     )}
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                   </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-0" align="start">
+                  <PopoverContent className="sm:w-[400px] w-full p-0" align="start">
                     <Command>
                       <CommandInput
                         placeholder="Name oder Ort..."
@@ -629,9 +629,9 @@ export function Step2Form({
             {/* UV-Träger Suche */}
             <div className="col-span-full">
               <Label>UV-Träger suchen oder neu anlegen</Label>
-              <div className="flex gap-3 mt-2">
+              <div className="flex gap-3 mt-2 flex-wrap">
                 <Popover open={uvOpen} onOpenChange={setUvOpen}>
-                  <PopoverTrigger render={<Button variant="outline" className="w-80 justify-between" />}>
+                  <PopoverTrigger render={<Button variant="outline" className="sm:w-80 w-full justify-between" />}>
 
                     {selectedUvTraegerId && uvName ? (
                       <span>{uvName}</span>
@@ -643,7 +643,7 @@ export function Step2Form({
                     <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
 
                   </PopoverTrigger>
-                  <PopoverContent className="w-[400px] p-0" align="start">
+                  <PopoverContent className="sm:w-[400px] w-full p-0" align="start">
                     <Command>
                       <CommandInput
                         placeholder="Name oder Kürzel..."

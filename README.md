@@ -16,4 +16,8 @@ Siehe [backend/README.md](backend/README.md)
 
 ## Frontend Setup
 
-Siehe [backend/README.md](frontend/README.md)
+Siehe [Frontend/README.md](frontend/README.md)
+
+## Dokumentation
+
+Siehe [Wiki Seite](https://gitlab.ges.thm.de/lehre/swtp/wise2526/g1_dabform/-/wikis/Dokumentation)
