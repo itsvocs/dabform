@@ -1,32 +1,32 @@
 //app/api/[...path]/route.ts
 
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8000";
 
 async function proxyRequest(
   request: NextRequest,
   path: string[],
-  method: string
+  method: string,
 ) {
   const cookieStore = await cookies();
-  const token = cookieStore.get('session')?.value;
+  const token = cookieStore.get("session")?.value;
 
-  const pathString = path.join('/');
+  const pathString = path.join("/");
   const searchParams = request.nextUrl.searchParams.toString();
-  const url = `${BACKEND_URL}/api/${pathString}${searchParams ? `?${searchParams}` : ''}`;
+  const url = `${BACKEND_URL}/api/${pathString}${searchParams ? `?${searchParams}` : ""}`;
 
   const headers: HeadersInit = {
     ...(token && { Authorization: `Bearer ${token}` }),
   };
 
   // Content-Type nur für JSON-Requests setzen
-  if (['POST', 'PUT', 'PATCH'].includes(method)) {
-    headers['Content-Type'] = 'application/json';
+  if (["POST", "PUT", "PATCH"].includes(method)) {
+    headers["Content-Type"] = "application/json";
   }
 
-  const body = ['POST', 'PUT', 'PATCH'].includes(method)
+  const body = ["POST", "PUT", "PATCH"].includes(method)
     ? await request.text()
     : undefined;
 
@@ -37,25 +37,26 @@ async function proxyRequest(
   });
 
   // Content-Type vom Backend prüfen
-  const contentType = response.headers.get('Content-Type') || '';
+  const contentType = response.headers.get("Content-Type") || "";
 
   // PDF oder andere binäre Daten direkt weiterleiten
-  if (contentType.includes('application/pdf') || 
-      contentType.includes('application/octet-stream') ||
-      contentType.includes('image/')) {
-    
+  if (
+    contentType.includes("application/pdf") ||
+    contentType.includes("application/octet-stream") ||
+    contentType.includes("image/")
+  ) {
     const buffer = await response.arrayBuffer();
-    
+
     // Alle relevanten Headers übernehmen
     const responseHeaders: Record<string, string> = {
-      'Content-Type': contentType,
+      "Content-Type": contentType,
     };
-    
-    const contentDisposition = response.headers.get('Content-Disposition');
+
+    const contentDisposition = response.headers.get("Content-Disposition");
     if (contentDisposition) {
-      responseHeaders['Content-Disposition'] = contentDisposition;
+      responseHeaders["Content-Disposition"] = contentDisposition;
     }
-    
+
     return new NextResponse(buffer, {
       status: response.status,
       headers: responseHeaders,
@@ -76,32 +77,32 @@ async function proxyRequest(
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   const params = await context.params;
-  return proxyRequest(request, params.path, 'GET');
+  return proxyRequest(request, params.path, "GET");
 }
 
 export async function POST(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   const params = await context.params;
-  return proxyRequest(request, params.path, 'POST');
+  return proxyRequest(request, params.path, "POST");
 }
 
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   const params = await context.params;
-  return proxyRequest(request, params.path, 'PUT');
+  return proxyRequest(request, params.path, "PUT");
 }
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   const params = await context.params;
-  return proxyRequest(request, params.path, 'DELETE');
+  return proxyRequest(request, params.path, "DELETE");
 }

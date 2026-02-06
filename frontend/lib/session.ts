@@ -1,3 +1,4 @@
+// /lib/session.ts
 import "server-only";
 import { cookies } from "next/headers";
 
@@ -12,11 +13,11 @@ export async function createSession(backendToken: string) {
 
   cookieStore.set("session", backendToken, {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     expires: expiresAt,
     sameSite: "lax",
     path: "/",
-    domain: 'localhost',
+    // domain: 'localhost',
   });
 }
 
