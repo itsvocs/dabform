@@ -30,7 +30,6 @@ import type { BerichtCreate, BerichtUpdate } from "@/types";
 
 // Step Forms
 import { Step1Form } from "./Step1Form";
-import { Step2Form } from "./Step2Form";
 import { Step3Form } from "./Step3Form";
 import { Step4Form } from "./Step4Form";
 import { Step5Form } from "./Step5Form";
@@ -41,6 +40,7 @@ import { Loader2, Save, ChevronLeft, ChevronRight, FileText, Check } from "lucid
 import { Stepper, StepperIndicator, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from "@/components/ui/stepper";
 import { Spinner } from "@/components/ui/spinner";
 import { toastManager } from "@/components/ui/toast";
+import { Step2Form } from "./Step2FormComponent";
 
 // Step Schemas Mapping
 const stepSchemas = {
