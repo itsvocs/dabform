@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // frontend/lib/bericht-csv.ts
 import type { Bericht } from "@/types";
 
@@ -214,7 +215,8 @@ export function csvRowToBerichtPatch(
     anderer_arzt_name: toNull(row.anderer_arzt_name) as any,
     anderer_arzt_adresse: toNull(row.anderer_arzt_adresse) as any,
 
-    arbeitsfaehig: row.arbeitsfaehig === "" ? null : toBool(row.arbeitsfaehig),
+    arbeitsfaehig:
+      row.arbeitsfaehig === "" ? undefined : toBool(row.arbeitsfaehig),
     arbeitsunfaehig_ab: toNull(row.arbeitsunfaehig_ab) as any,
     arbeitsfaehig_ab: toNull(row.arbeitsfaehig_ab) as any,
 
