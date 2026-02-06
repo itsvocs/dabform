@@ -3,6 +3,7 @@ DAB-Form Backend API
 FastAPI Application Entry Point
 """
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -13,7 +14,6 @@ from app.api.krankenkasse import router as krankenkasse_router
 from app.api.unfallbetrieb import router as unfallbetrieb_router
 from app.api.uv_traeger import router as uv_traeger_router
 from app.api.pdf import router as pdf_router
-import os
 
 # App erstellen
 app = FastAPI(
@@ -27,6 +27,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://dabform.vercel.app/",
 ]
 
 # optional: Prod-Frontend Domain aus ENV erlauben (z.B. https://deinprojekt.vercel.app)
