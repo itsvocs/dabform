@@ -13,6 +13,8 @@ from app.api.krankenkasse import router as krankenkasse_router
 from app.api.unfallbetrieb import router as unfallbetrieb_router
 from app.api.uv_traeger import router as uv_traeger_router
 from app.api.pdf import router as pdf_router
+import os
+
 # App erstellen
 app = FastAPI(
     title="DAB-Form API",
@@ -22,10 +24,20 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+# optional: Prod-Frontend Domain aus ENV erlauben (z.B. https://deinprojekt.vercel.app)
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    origins.append(frontend_url)
+
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

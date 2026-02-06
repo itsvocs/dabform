@@ -8,8 +8,9 @@ class Settings(BaseSettings):
     """Application Settings """
 
     # Database
-    DATABASE_URL: str = "postgresql://dab_user:dab_password@localhost:5432/dab_form"
-
+    # DATABASE_URL: str = "postgresql://dab_user:dab_password@localhost:5432/dab_form"
+    DATABASE_URL: str 
+    # = "postgresql://neondb_owner:npg_vseFVyHN76ap@ep-winter-morning-ag1eib8c-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
     # JWT
     SECRET_KEY: str = "change-this-in-production-min-32-characters-long"
     ALGORITHM: str = "HS256"
