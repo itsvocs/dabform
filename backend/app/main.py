@@ -27,7 +27,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://dabform.vercel.app/",
+    "https://dabform.vercel.app",
 ]
 
 # optional: Prod-Frontend Domain aus ENV erlauben (z.B. https://deinprojekt.vercel.app)
