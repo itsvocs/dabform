@@ -74,7 +74,7 @@ export default function Header() {
                     ) : (
                         <Link href="/login">
                             <Button variant="ghost">
-                                <span className='sr-only sm:not-sr-only'>Sich</span>{" "}anmelden
+                                <span className='sr-only sm:not-sr-only'>Sich</span> anmelden
                             </Button>
                         </Link>
                     )}

@@ -2,6 +2,10 @@ import Link from 'next/link'
 
 const links: { title: string, href: string }[] = [
     {
+        title: 'Github',
+        href: 'https://github.com/itsvocs/dabform',
+    },
+    {
         title: 'Gitlab',
         href: 'https://gitlab.ges.thm.de/lehre/swtp/wise2526/g1_dabform',
     }, {
