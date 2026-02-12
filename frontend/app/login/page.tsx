@@ -42,6 +42,16 @@ export default function Login() {
     return (
         <div className="flex items-center justify-center ">
             <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
+                <div className="sm:mx-auto sm:w-full sm:max-w-5xl">
+                    {error && (
+                        <Alert variant="error" className="mb-4">
+                            <CircleAlertIcon />
+                            <AlertTitle>Fehler</AlertTitle>
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
+                </div>
+
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="flex items-center">
                         <Logo className="h-10 w-10 text-foreground -translate-x-3.5" aria-hidden={true} />
@@ -51,7 +61,7 @@ export default function Login() {
                     </h3>
                     <p className="mt-2 text-sm text-muted-foreground">
                         Noch kein Konto?{" "}
-                        <Link href="/register" className="font-medium text-primary hover:text-primary/90">
+                        <Link href="https://dabform.onrender.com/docs" className="font-medium text-primary hover:text-primary/90">
                             Konto anfordern
                         </Link>
                     </p>
@@ -62,13 +72,6 @@ export default function Login() {
                         </div>
                     </div>
 
-                    {error && (
-                        <Alert variant="error" className="mb-4">
-                            <CircleAlertIcon />
-                            <AlertTitle>Fehler</AlertTitle>
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
-                    )}
 
                     <form onSubmit={onSubmit} className="mt-6 space-y-4">
                         <div>

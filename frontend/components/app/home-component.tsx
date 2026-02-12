@@ -14,12 +14,12 @@ export function HomeComponent() {
                 <div className="max-w-4xl text-center">
 
                     {/* Title */}
-                    <h1 className="mb-6 text-xl font-bold tracking-tight text-foreground sm:text-6xl md:text-8xl">
+                    <h1 className="mb-6 text-3xl font-bold tracking-tight text-foreground sm:text-6xl md:text-8xl">
                         Digitaler Durchgangsarztbericht
                     </h1>
 
                     {/* Description */}
-                    <p className="mx-auto mb-10 max-w-2xl text-base text-black/60 dark:text-white/60 sm:text-xl">
+                    <p className="mx-auto mb-10 max-w-2xl text-sm text-black/60 dark:text-white/60 sm:text-xl">
                         Eine Plattform für die einfache Erstellung und Verwaltung digitaler Durchgangsarztberichte für Durchgangsärzte, von allen Geräten und überall erreichbar.
                     </p>
 
@@ -44,7 +44,7 @@ export function HomeComponent() {
                             </svg>
                         </button>
                         <button className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-black/20 bg-black/5 dark:bg-white/5 px-8 text-base font-medium text-black dark:text-white backdrop-blur-sm transition-all hover:bg-black/10 hover:border-black/30"
-                            onClick={() => router.push("https://gitlab.ges.thm.de/lehre/swtp/wise2526/g1_dabform/-/wikis/home")}
+                            onClick={() => router.push("https://dabform.onrender.com/docs")}
                         >
                             Zur Dokumentation
                         </button>

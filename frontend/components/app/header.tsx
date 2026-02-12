@@ -42,7 +42,7 @@ export default function Header() {
 
                 <div className="flex items-center gap-4">
                     {loading ? (
-                        <div className="h-8 w-20 animate-pulse bg-muted rounded" />
+                        <div className="h-4 w-20 animate-pulse bg-muted rounded" />
                     ) : user ? (
                         <Menu>
                             <MenuTrigger render={<Button variant="ghost" />}>Dr.{" "} {user.vorname} {" "} {user.nachname}
@@ -74,7 +74,7 @@ export default function Header() {
                     ) : (
                         <Link href="/login">
                             <Button variant="ghost">
-                                Sich anmelden
+                                <span className='sr-only sm:not-sr-only'>Sich</span>{" "}anmelden
                             </Button>
                         </Link>
                     )}
